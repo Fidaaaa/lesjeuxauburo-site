@@ -203,11 +203,14 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
   transition: transform .1s ease, box-shadow .15s ease;
 }
 .gamecard:hover { transform: translateY(-2px); }
-.gamecard__emoji {
-  font-size: 1.7rem; width: 46px; height: 46px; flex: none; border-radius: 12px;
-  display: grid; place-items: center;
+/* Vignette du jeu : l'illustration générée, la même que dans l'app iOS */
+.gamecard__art {
+  width: 52px; height: 52px; flex: none; border-radius: 13px;
+  display: grid; place-items: center; overflow: hidden;
   background: color-mix(in srgb, var(--game-color, var(--primary)) 16%, var(--surface));
 }
+.gamecard__art img { width: 84%; height: 84%; object-fit: contain; display: block; }
+.gamecard__emoji { font-size: 1.6rem; line-height: 1; }
 .gamecard__body { flex: 1; min-width: 0; }
 .gamecard__name { font-weight: 800; }
 .gamecard__tag { color: var(--muted); font-size: .82rem; margin-top: .1rem; }
@@ -219,7 +222,7 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .gamecard__badge-label { font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; line-height: 1.1; }
 
 .gamecard--soon { opacity: .72; cursor: default; }
-.gamecard--soon .gamecard__emoji { filter: grayscale(.4); }
+.gamecard--soon .gamecard__art { filter: grayscale(.5); opacity: .8; }
 .gamecard__soon {
   font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
   background: var(--surface-2); color: var(--muted); padding: .25rem .5rem; border-radius: 99px; flex: none;
@@ -557,7 +560,12 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .stats-games { display: grid; gap: .8rem; }
 .stats-card { background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--game-color); border-radius: var(--radius); box-shadow: var(--shadow); padding: .9rem; }
 .stats-card__head { display: flex; align-items: center; gap: .5rem; margin-bottom: .7rem; }
-.stats-card__emoji { font-size: 1.3rem; }
+.stats-card__art {
+  width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--game-color, var(--primary)) 16%, var(--surface));
+}
+.stats-card__art img { width: 84%; height: 84%; object-fit: contain; }
 .stats-card__name { font-weight: 800; font-size: 1.05rem; }
 .stats-card__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin-bottom: .8rem; }
 .mini-stat { text-align: center; }
@@ -624,3 +632,23 @@ body.modal-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* ---------- Sauvegarde de la progression (sans compte) ---------- */
+.backup__warn {
+  background: color-mix(in srgb, var(--coffee) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--coffee) 35%, var(--border));
+  border-radius: var(--radius-sm); padding: .8rem .9rem; margin-bottom: .9rem;
+}
+.backup__warn p { font-size: .85rem; color: var(--text); margin-top: .3rem; }
+.backup__intro { font-size: .87rem; color: var(--muted); margin-bottom: .8rem; }
+.backup__actions { display: flex; flex-direction: column; gap: .5rem; }
+.backup__field {
+  width: 100%; font: inherit; font-size: .8rem; font-family: ui-monospace, monospace;
+  padding: .7rem; margin-top: .6rem; resize: vertical;
+  border-radius: var(--radius-sm); border: 2px solid var(--border);
+  background: var(--surface); color: var(--text);
+}
+.backup__field:focus { border-color: var(--primary); outline: none; }
+.backup__feedback { font-size: .85rem; font-weight: 700; margin-top: .5rem; min-height: 1.2em; }
+.backup__feedback[data-state="ok"] { color: var(--accent); }
+.backup__feedback[data-state="error"] { color: var(--mot-correct); }

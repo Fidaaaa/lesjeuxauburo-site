@@ -70,10 +70,31 @@ export function renderHub(view) {
   view.append(hub);
 }
 
+// Vignette d'un jeu : l'illustration générée, avec repli sur l'emoji si l'image
+// n'a pas (encore) été chargée. Mêmes visuels que l'application iOS.
+function gameArtwork(game) {
+  const box = el('div.gamecard__art', {
+    'aria-hidden': 'true',
+    style: { '--game-color': game.color },
+  });
+  if (game.art) {
+    box.append(el('img', {
+      src: game.art, alt: '', loading: 'lazy', decoding: 'async',
+      onError: (e) => {
+        e.target.remove();
+        box.append(el('span.gamecard__emoji', { text: game.emoji }));
+      },
+    }));
+  } else {
+    box.append(el('span.gamecard__emoji', { text: game.emoji }));
+  }
+  return box;
+}
+
 function gameCard(game, dateStr) {
   if (!game.available) {
     return el('div.gamecard.gamecard--soon', { 'aria-disabled': 'true' }, [
-      el('div.gamecard__emoji', { 'aria-hidden': 'true', text: game.emoji }),
+      gameArtwork(game),
       el('div.gamecard__body', {}, [
         el('div.gamecard__name', { text: game.name }),
         el('div.gamecard__tag', { text: game.tagline }),
@@ -92,7 +113,7 @@ function gameCard(game, dateStr) {
     'aria-label': `${game.name} — ${badge.label}`,
     onClick: () => navigate(`/${game.id}`),
   }, [
-    el('div.gamecard__emoji', { 'aria-hidden': 'true', text: game.emoji }),
+    gameArtwork(game),
     el('div.gamecard__body', {}, [
       el('div.gamecard__name', {}, [game.name]),
       el('div.gamecard__tag', { text: game.tagline }),

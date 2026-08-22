@@ -6,6 +6,8 @@ import { loadStats } from '../core/storage.js';
 import { el, clear } from '../core/dom.js';
 import { showModal } from './modal.js';
 import { STORAGE_PREFIX } from '../core/config.js';
+import { exportBackup, importBackup, progressAtRisk } from '../core/persistence.js';
+import { copyText } from '../core/share.js';
 
 // Ordre d'affichage des clés de répartition, par jeu.
 const DIST_ORDER = {
@@ -57,11 +59,89 @@ export function renderStats(view) {
   }
   wrap.append(list);
 
+  wrap.append(el('h2.stats__section', { text: 'Ma progression' }));
+  wrap.append(backupCard());
+
   wrap.append(el('div.stats__reset', {}, [
     el('button.cf-giveup', { type: 'button', text: 'Réinitialiser mes statistiques', onClick: confirmReset }),
   ]));
 
   view.append(wrap);
+}
+
+/// Sauvegarde sans compte : un code à copier, à coller sur un autre appareil.
+/// Rappelle aussi d'installer le jeu sur l'écran d'accueil quand c'est utile —
+/// sur iPhone, c'est ce qui empêche Safari d'effacer la progression.
+function backupCard() {
+  const card = el('section.stats-card');
+
+  if (progressAtRisk()) {
+    card.append(el('div.backup__warn', {}, [
+      el('strong', { text: '📲 Installe le jeu sur ton écran d’accueil' }),
+      el('p', {
+        text: 'Sur iPhone, Safari efface la progression d’un site après 7 jours '
+            + 'sans visite. Une fois installé, le jeu y échappe — et fonctionne hors ligne. '
+            + 'Bouton Partager, puis « Sur l’écran d’accueil ».',
+      }),
+    ]));
+  }
+
+  card.append(
+    el('p.backup__intro', {
+      text: 'Pas de compte ici : ta progression reste sur cet appareil. '
+          + 'Pour la transférer ou la mettre à l’abri, copie ce code et garde-le.',
+    }),
+    el('div.backup__actions', {}, [
+      el('button.btn.btn--primary', {
+        type: 'button', text: '📋 Copier mon code de sauvegarde',
+        onClick: async (e) => {
+          const ok = await copyText(exportBackup());
+          e.target.textContent = ok ? '✅ Code copié !' : '❌ Copie impossible';
+          setTimeout(() => { e.target.textContent = '📋 Copier mon code de sauvegarde'; }, 2500);
+        },
+      }),
+      el('button.btn.btn--ghost', {
+        type: 'button', text: '↩︎ Restaurer depuis un code', onClick: askRestore,
+      }),
+    ]),
+  );
+  return card;
+}
+
+function askRestore() {
+  const field = el('textarea.backup__field', {
+    rows: '4', placeholder: 'Colle ici ton code de sauvegarde…',
+    'aria-label': 'Code de sauvegarde',
+  });
+  const feedback = el('p.backup__feedback');
+
+  showModal({
+    title: 'Restaurer ma progression',
+    body: el('div', {}, [
+      el('p', {
+        text: 'Colle le code copié depuis ton autre appareil. Tes parties actuelles '
+            + 'ne seront pas supprimées : seules celles présentes dans le code sont rétablies.',
+      }),
+      field, feedback,
+    ]),
+    actions: [
+      { label: 'Annuler' },
+      {
+        label: 'Restaurer', primary: true, close: false,
+        onClick: () => {
+          const result = importBackup(field.value);
+          if (!result.ok) {
+            feedback.textContent = `❌ ${result.reason}`;
+            feedback.dataset.state = 'error';
+            return;
+          }
+          feedback.textContent = `✅ ${result.restored} élément(s) restauré(s). Rechargement…`;
+          feedback.dataset.state = 'ok';
+          setTimeout(() => { location.hash = '#/'; location.reload(); }, 900);
+        },
+      },
+    ],
+  });
 }
 
 function statTile(label, value) {
@@ -71,11 +151,22 @@ function statTile(label, value) {
   ]);
 }
 
+// Même vignette que sur le hub, en plus petit.
+function statsArtwork(game) {
+  const box = el('div.stats-card__art', {
+    'aria-hidden': 'true', style: { '--game-color': game.color },
+  });
+  box.append(game.art
+    ? el('img', { src: game.art, alt: '', loading: 'lazy' })
+    : el('span', { text: game.emoji }));
+  return box;
+}
+
 function gameStatCard(g) {
   const s = loadStats(g.id);
   const card = el('section.stats-card', { style: { '--game-color': g.color } });
   card.append(el('div.stats-card__head', {}, [
-    el('span.stats-card__emoji', { 'aria-hidden': 'true', text: g.emoji }),
+    statsArtwork(g),
     el('span.stats-card__name', { text: g.name }),
   ]));
   card.append(el('div.stats-card__row', {}, [

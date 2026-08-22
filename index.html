@@ -8,6 +8,15 @@
   <meta name="theme-color" content="#e9edf3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%E2%98%95</text></svg>" />
   <link rel="stylesheet" href="styles/main.css" />
+
+  <!-- Installation sur l'écran d'accueil. Sur iPhone, c'est ce qui met la
+       progression à l'abri : Safari efface le stockage d'un site après 7 jours
+       sans visite, mais épargne les apps installées. -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/art/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="lesjeuxauburo" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <script>
     // Applique le thème avant le premier rendu pour éviter tout clignotement.
     (function () {
