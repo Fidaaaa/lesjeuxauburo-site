@@ -2,7 +2,7 @@
 
 Sept mini-jeux quotidiens en français, à jouer pendant la pause café.
 
-👉 **[Jouer](https://fidaaaa.github.io/lesjeuxauburo-site/)**
+👉 **[Jouer](https://lesjeuxauburo.fr/)**
 
 ---
 
