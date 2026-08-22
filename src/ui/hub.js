@@ -1,7 +1,7 @@
 // Page d'accueil = hub. Une carte par jeu avec l'état du jour, le score et la
 // streak. Objectif : donner envie de « finir sa tournée » quotidienne.
 
-import { GAMES } from '../core/registry.js';
+import { GAMES, AVAILABLE_GAMES } from '../core/registry.js';
 import { getPuzzleDate, humanDate, isDateOverridden } from '../core/date.js';
 import { loadStats } from '../core/storage.js';
 import { tourneeSummary, gameDayState } from '../core/tournee.js';
@@ -30,7 +30,7 @@ export function renderHub(view) {
       el('span.hub__brand-emoji', { 'aria-hidden': 'true', text: '☕' }),
       ' lesjeuxauburo',
     ]),
-    el('p.hub__tagline', { text: 'La pause café en 7 mini-jeux. Nouveaux puzzles chaque jour à 2h.' }),
+    el('p.hub__tagline', { text: `La pause café en ${AVAILABLE_GAMES.length} mini-jeux. Nouveaux puzzles chaque jour à 2h.` }),
     el('p.hub__date', { text: capitalize(humanDate(dateStr)) + (isDateOverridden() ? ' (date simulée)' : '') }),
     el('div.hub__countdown', {}, [el('span', { text: 'Prochains jeux dans ' }), countdownValue]),
   ]);

@@ -18,12 +18,18 @@ const DIST_ORDER = {
   intrus: ['2', '1', 'X'],
   chaudfroid: ['1-5', '6-10', '11-20', '21-40', '40+', 'X'],
   evasion: ['★★★', '★★', '★', 'X'],
+  boite: ['2', '3', '4', '5', '6', 'X'],
+  gaufre: ['5', '4', '3', '2', '1', '0', 'X'],
+  tango: ['5', '4', '3', '2', '1', 'X'],
 };
 const DIST_LABEL = {
   intrus: { '2': 'Sans-faute', '1': 'Intrus seul', X: 'Échec' },
   connexions: { 0: '0 err.', 1: '1 err.', 2: '2 err.', 3: '3 err.', X: 'Échec' },
   allumettes: { 1: '1 coup', 2: '2 coups', X: 'Abandon' },
   evasion: { '★★★': 'Au mieux', '★★': 'Efficace', '★': 'Résolu', X: 'Abandon' },
+  boite: { 2: '2 mots', 3: '3 mots', 4: '4 mots', 5: '5 mots', 6: '6 mots', X: 'Échec' },
+  gaufre: { 5: '5 ★', 4: '4 ★', 3: '3 ★', 2: '2 ★', 1: '1 ★', 0: '0 ★', X: 'Échec' },
+  tango: { 5: '5 ★', 4: '4 ★', 3: '3 ★', 2: '2 ★', 1: '1 ★', X: 'Abandon' },
 };
 
 function pct(n, d) { return d ? Math.round((100 * n) / d) : 0; }

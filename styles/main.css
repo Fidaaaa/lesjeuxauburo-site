@@ -525,6 +525,98 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .cf-entry__band { font-weight: 700; font-size: .85rem; white-space: nowrap; }
 .cf-entry__rank { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+/* ---------- La Boîte à Lettres ---------- */
+.boite-wrap { display: grid; place-items: center; margin: .4rem 0 1.1rem; }
+.boite-box {
+  --box: min(300px, 78vw);
+  position: relative; width: var(--box); height: var(--box);
+}
+/* Le carré lui-même : un liseré, laissant la place aux pastilles autour. */
+.boite-box::before {
+  content: ""; position: absolute; inset: 15%;
+  border: 2px solid var(--border); border-radius: 8px; background: var(--surface);
+}
+.boite-side { position: absolute; display: flex; gap: calc(var(--box) * .07); }
+.boite-side--top { top: 0; left: 15%; right: 15%; justify-content: space-around; }
+.boite-side--bottom { bottom: 0; left: 15%; right: 15%; justify-content: space-around; }
+.boite-side--left { left: 0; top: 15%; bottom: 15%; flex-direction: column; justify-content: space-around; }
+.boite-side--right { right: 0; top: 15%; bottom: 15%; flex-direction: column; justify-content: space-around; }
+.boite-letter {
+  width: calc(var(--box) * .15); height: calc(var(--box) * .15);
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--muted); color: var(--text);
+  font-weight: 800; font-size: calc(var(--box) * .075);
+  transition: background .15s ease, border-color .15s ease, transform .1s ease;
+}
+.boite-letter[data-used="1"] { background: var(--accent); border-color: var(--accent); color: var(--tile-ink); }
+.boite-letter[data-draft="1"] { border-color: var(--primary); transform: scale(1.08); }
+.boite-center { position: absolute; inset: 30%; display: grid; place-content: center; text-align: center; }
+.boite-center__count { font-size: calc(var(--box) * .13); font-weight: 800; font-variant-numeric: tabular-nums; }
+.boite-center__label { font-size: calc(var(--box) * .045); color: var(--muted); }
+
+.boite-form { display: flex; gap: .5rem; max-width: 460px; margin: 0 auto; }
+.boite-input {
+  flex: 1; min-width: 0; padding: .8rem .9rem; border-radius: var(--radius-sm);
+  border: 2px solid var(--border); background: var(--surface); color: var(--text);
+  font: inherit; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.boite-input:focus { border-color: var(--primary); outline: none; }
+.boite-count { text-align: center; color: var(--muted); font-size: .82rem; margin-top: .5rem; }
+.boite-words { max-width: 460px; margin: 1.2rem auto 0; }
+.boite-words__title { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .4rem; }
+.boite-words__list { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.boite-chip {
+  background: var(--surface-2); border-radius: 999px; padding: .28rem .7rem;
+  font-weight: 700; font-size: .9rem; letter-spacing: .03em;
+}
+.boite-arrow { color: var(--muted); }
+
+/* ---------- La Gaufre ---------- */
+.gaufre-board {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+  width: min(340px, 88vw); margin: .4rem auto 1rem;
+}
+.gaufre-hole { aspect-ratio: 1 / 1; }
+.gaufre-tile {
+  position: relative; aspect-ratio: 1 / 1; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--surface); color: var(--text);
+  font-weight: 800; font-size: clamp(1rem, 5.4vw, 1.5rem); text-transform: uppercase;
+  display: grid; place-items: center;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+.gaufre-tile[data-colour="correct"] { background: var(--mot-correct); border-color: var(--mot-correct); color: var(--tile-ink); }
+.gaufre-tile[data-colour="present"] { background: var(--mot-present); border-color: var(--mot-present); color: var(--tile-ink); border-radius: 50%; }
+.gaufre-tile[data-colour="absent"] { background: var(--surface-2); border-color: var(--border); color: var(--muted); }
+.gaufre-tile[data-selected="1"] { outline: 3px solid var(--primary); outline-offset: 2px; transform: scale(1.06); z-index: 2; }
+.gaufre-tile:disabled { cursor: default; }
+.gaufre-tile__mark { position: absolute; bottom: 2px; right: 5px; font-size: .55rem; line-height: 1; opacity: .85; }
+.gaufre-counter { text-align: center; color: var(--muted); font-size: .88rem; min-height: 1.3em; }
+
+/* ---------- Tango ---------- */
+.tango-board {
+  position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px;
+  width: min(360px, 92vw); margin: .4rem auto 1rem;
+  background: var(--border); border: 3px solid var(--border); border-radius: 12px;
+}
+.tango-cell {
+  aspect-ratio: 1 / 1; border: 0; background: var(--surface); color: var(--text);
+  display: grid; place-items: center; font-size: clamp(1rem, 5vw, 1.5rem);
+  transition: background .12s ease, transform .06s ease;
+}
+.tango-cell[data-locked="1"] { background: var(--surface-2); }
+.tango-cell[data-error="1"] { background: color-mix(in srgb, var(--mot-correct) 32%, var(--surface)); }
+.tango-cell:not(:disabled):active { transform: scale(.93); }
+.tango-cell__glyph { line-height: 1; }
+.tango-link {
+  position: absolute; transform: translate(-50%, -50%); z-index: 3;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--muted); color: var(--text);
+  display: grid; place-items: center; font-size: .72rem; font-weight: 800; line-height: 1;
+  pointer-events: none;
+}
+.tango-status { text-align: center; color: var(--muted); font-size: .88rem; min-height: 1.3em; }
+.tango-actions { display: flex; flex-direction: column; gap: .1rem; margin-top: .4rem; }
+
 /* ---------- Panneau de fin ---------- */
 .end-slot { margin-top: 1.2rem; }
 .endpanel {

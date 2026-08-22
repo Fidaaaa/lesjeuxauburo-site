@@ -9,7 +9,9 @@
 // vit dans localStorage et n'est jamais touchée ici — vider le cache ne fait
 // donc jamais perdre une partie.
 
-const VERSION = 'v1';
+// À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
+// sans cela, les visiteurs de retour garderaient l'ancienne version.
+const VERSION = 'v2';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors

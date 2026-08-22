@@ -75,6 +75,36 @@ export const GAMES = [
     available: true,
     load: () => import('../games/evasion/evasion.js'),
   },
+  {
+    id: 'boite',
+    name: 'La Boîte à Lettres',
+    emoji: '🔠',
+    art: 'assets/art/art_boite.png',
+    color: '#6f7fb5',
+    tagline: 'Enchaîne des mots pour épuiser les douze lettres',
+    available: true,
+    load: () => import('../games/boite/boite.js'),
+  },
+  {
+    id: 'gaufre',
+    name: 'La Gaufre',
+    emoji: '🧇',
+    art: 'assets/art/art_gaufre.png',
+    color: '#d99a2b',
+    tagline: 'Remets six mots croisés d’aplomb en 15 échanges',
+    available: true,
+    load: () => import('../games/gaufre/gaufre.js'),
+  },
+  {
+    id: 'tango',
+    name: 'Tango',
+    emoji: '🌗',
+    art: 'assets/art/art_tango.png',
+    color: '#7a6bab',
+    tagline: 'Soleils et lunes : une grille, une seule logique',
+    available: true,
+    load: () => import('../games/tango/tango.js'),
+  },
 ];
 
 export function getGame(id) {
