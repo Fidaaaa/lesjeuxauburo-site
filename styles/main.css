@@ -227,6 +227,24 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 
 .hub__footer { text-align: center; margin-top: 1.6rem; }
 .hub__stats-link { font-weight: 700; text-decoration: none; font-size: .9rem; }
+.hub__links { margin-top: .9rem; font-size: .8rem; color: var(--muted); }
+.hub__links a { color: var(--muted); text-decoration: underline; }
+
+/* ---------- Pages annexes (aide, confidentialité) ---------- */
+.page { max-width: 40rem; line-height: 1.65; }
+.page__title { font-size: 1.7rem; margin: .6rem 0 .2rem; }
+.page__date { color: var(--muted); font-size: .85rem; margin-bottom: 1.2rem; }
+.page h2 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; }
+.page h3 { font-size: .98rem; margin: 1.2rem 0 .3rem; }
+.page p, .page li { color: var(--text); }
+.page ul { margin: .4rem 0 .8rem 1.2rem; }
+.page li { margin-bottom: .3rem; }
+.page__card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: .6rem; box-shadow: var(--shadow); }
+.page__card h2 { margin-top: 0; }
+.page__list dt { font-weight: 800; margin-top: .9rem; }
+.page__list dd { margin: .2rem 0 0 0; color: var(--muted); }
+.page__back { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: .9rem; }
 
 /* ---------- En-tête de jeu ---------- */
 .game-head {

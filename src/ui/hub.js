@@ -61,6 +61,11 @@ export function renderHub(view) {
   hub.append(hero, tourneeCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
     el('footer.hub__footer', {}, [
       el('a.hub__stats-link', { href: '#/stats', text: '📊 Mes statistiques' }),
+      el('div.hub__links', {}, [
+        el('a', { href: 'support.html', text: 'Aide' }),
+        ' · ',
+        el('a', { href: 'confidentialite.html', text: 'Confidentialité' }),
+      ]),
     ]));
   view.append(hub);
 }

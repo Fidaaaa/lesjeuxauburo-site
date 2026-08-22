@@ -20,4 +20,4 @@ export const TZ = 'Europe/Paris';
 // Laisse vide pour utiliser l'adresse courante ; renseigne-la après déploiement
 // (ex : 'https://lesjeuxauburo.netlify.app') — indispensable pour que les
 // partages depuis l'app iOS pointent vers une vraie adresse.
-export const SITE_URL = '';
+export const SITE_URL = 'https://fidaaaa.github.io/lesjeuxauburo-site/';
