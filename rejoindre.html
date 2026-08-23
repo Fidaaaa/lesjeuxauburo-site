@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Rejoindre un groupe — lesjeuxauburo</title>
+  <meta name="theme-color" content="#e9edf3" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/art/icon-192.png" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <!--
+    Page d'atterrissage des invitations à un groupe.
+
+    Pourquoi une vraie page plutôt que le fragment #/groupe/CODE : iOS décide
+    d'ouvrir l'app à partir du **chemin** de l'URL et ignore le fragment. Un
+    lien universel ne peut donc pas viser #/… ; il lui faut /rejoindre.html.
+
+    Sur iPhone avec l'app installée, cette page ne s'affiche jamais : iOS
+    intercepte le lien avant. Partout ailleurs, elle bascule sur la route
+    interne du site.
+  -->
+</head>
+<body>
+  <main class="view" id="view">
+    <div class="board">
+      <p class="board__loading">Ouverture de l'invitation…</p>
+      <noscript>
+        <p class="board__note">
+          Ce lien a besoin de JavaScript. Ouvre
+          <a href="https://lesjeuxauburo.fr/">lesjeuxauburo.fr</a>, va dans
+          Classement → Mes groupes → Rejoindre, et saisis le code qui termine
+          l'adresse de ce lien.
+        </p>
+      </noscript>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var code = new URLSearchParams(location.search).get('g') || '';
+      code = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+      location.replace(code ? './#/groupe/' + code : './');
+    })();
+  </script>
+</body>
+</html>

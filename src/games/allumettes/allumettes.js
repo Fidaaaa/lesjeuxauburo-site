@@ -42,6 +42,37 @@ const GEO = {
   eq: { vb: [0, 0, 40, 92], t: [5, 31, 30, 9], b: [5, 55, 30, 9] },
 };
 
+// Écran tactile : le pointeur est « grossier ». On adapte alors la visée et la
+// taille du plateau, sans rien changer à l'expérience à la souris.
+const COARSE_POINTER = typeof window !== 'undefined'
+  && window.matchMedia?.('(pointer: coarse)').matches === true;
+
+/** Distance d'un point à un rectangle (0 s'il est dedans). */
+function distanceToRect(px, py, [x, y, w, h]) {
+  const dx = Math.max(x - px, 0, px - (x + w));
+  const dy = Math.max(y - py, 0, py - (y + h));
+  return Math.hypot(dx, dy);
+}
+
+/** Segment le plus proche du point touché, dans le repère du SVG. */
+function nearestSegment(svg, geo, event) {
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  const { x, y } = point.matrixTransform(ctm.inverse());
+
+  let best = null;
+  let bestDistance = Infinity;
+  for (const [seg, rect] of Object.entries(geo)) {
+    if (seg === 'vb') continue;
+    const distance = distanceToRect(x, y, rect);
+    if (distance < bestDistance) { bestDistance = distance; best = seg; }
+  }
+  return best;
+}
+
 const HOW_TO = {
   title: '🔥 Les Allumettes — comment jouer',
   html: `
@@ -202,6 +233,19 @@ export default {
       const svg = document.createElementNS(SVGNS, 'svg');
       svg.setAttribute('viewBox', geo.vb.join(' '));
       svg.setAttribute('class', `allu-cell allu-cell--${cell.type}`);
+      const playable = !cell.locked && status === 'playing';
+
+      // Au doigt, une allumette ne mesure que quelques millimètres : viser
+      // juste est impossible. On accepte donc le toucher n'importe où dans la
+      // case et on agit sur l'allumette la plus proche. À la souris, on garde
+      // le clic exact, qui marche déjà très bien.
+      if (playable && COARSE_POINTER) {
+        svg.addEventListener('click', (e) => {
+          const seg = nearestSegment(svg, geo, e);
+          if (seg) toggleSeg(cell, seg);
+        });
+      }
+
       for (const [seg, rect] of Object.entries(geo)) {
         if (seg === 'vb') continue;
         const on = cell.active.has(seg);
@@ -211,11 +255,11 @@ export default {
         r.setAttribute('width', w); r.setAttribute('height', h);
         r.setAttribute('rx', Math.min(w, h) / 2);
         r.setAttribute('class', `allu-stick ${on ? 'is-on' : 'is-off'}`);
-        if (!cell.locked && status === 'playing') {
+        if (playable) {
           r.setAttribute('tabindex', '0');
           r.setAttribute('role', 'button');
           r.setAttribute('aria-label', on ? 'Allumette posée, cliquer pour la retirer' : 'Emplacement vide, cliquer pour poser une allumette');
-          r.addEventListener('click', () => toggleSeg(cell, seg));
+          if (!COARSE_POINTER) r.addEventListener('click', () => toggleSeg(cell, seg));
           r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSeg(cell, seg); } });
         } else {
           r.setAttribute('aria-hidden', 'true');
@@ -239,6 +283,23 @@ export default {
     function renderBoard() {
       clear(boardEl);
       cells.forEach((c, i) => boardEl.append(makeCellSvg(c, i)));
+      fitBoard();
+    }
+
+    /* Dimensionne les cases pour occuper toute la largeur disponible : une
+       équation courte s'affiche donc plus grand qu'une longue, au lieu d'une
+       taille unique calculée pour le pire cas. Sur écran tactile on autorise
+       nettement plus grand — c'est là que la précision manque. */
+    function fitBoard() {
+      const style = getComputedStyle(boardEl);
+      const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const gap = parseFloat(style.columnGap) || 0;
+      const available = boardEl.clientWidth - padding - gap * (cells.length - 1);
+      if (available <= 0) return;
+      const units = cells.reduce((sum, c) => sum + (c.type === 'digit' ? 50 : 40), 0);
+      const height = (available * 92) / units;
+      const max = COARSE_POINTER ? 140 : 104;
+      boardEl.style.setProperty('--allu-h', `${Math.max(64, Math.min(max, height))}px`);
     }
 
     function renderStatus() {
@@ -348,5 +409,18 @@ export default {
       renderStatus();
       maybeShowHowTo(GAME_ID, HOW_TO);
     }
+
+    // Rotation de l'écran, fenêtre redimensionnée, plateau enfin visible : on
+    // observe la largeur réelle plutôt que celle de la fenêtre. On ignore les
+    // changements de hauteur, que fitBoard provoque lui-même — sinon boucle.
+    let lastWidth = 0;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      if (width === lastWidth) return;
+      lastWidth = width;
+      fitBoard();
+    });
+    observer.observe(boardEl);
+    return () => observer.disconnect();
   },
 };

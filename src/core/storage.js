@@ -49,7 +49,16 @@ export function loadResult(gameId, dateStr) {
 }
 
 export function saveResult(gameId, dateStr, result) {
-  return writeJSON(key('result', gameId, dateStr), result);
+  const saved = writeJSON(key('result', gameId, dateStr), result);
+  // Une victoire vaut un point au classement du mois. L'import est différé
+  // pour que le module de classement — et le réseau — ne pèsent pas sur le
+  // chargement d'une partie.
+  if (result?.status === 'win') {
+    import('./leaderboard.js')
+      .then((m) => m.recordWin(gameId, dateStr))
+      .catch(() => { /* le classement est facultatif */ });
+  }
+  return saved;
 }
 
 // --- Statistiques persistantes par jeu ---

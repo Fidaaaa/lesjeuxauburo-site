@@ -5,6 +5,7 @@ import { getGame } from './registry.js';
 import { getPuzzleDate, getDayNumber, getPuzzleNumber } from './date.js';
 import { renderHub } from '../ui/hub.js';
 import { renderStats } from '../ui/stats.js';
+import { renderLeaderboard, renderGroupInvite } from '../ui/leaderboard.js';
 import { clear } from './dom.js';
 
 let viewEl = null;
@@ -29,7 +30,8 @@ function puzzleContext(game) {
 function parseRoute() {
   const h = location.hash.replace(/^#/, '') || '/';
   const parts = h.split('/').filter(Boolean);
-  return parts[0] || null; // null => hub
+  // #/groupe/ABC123 → { id: 'groupe', param: 'ABC123' }
+  return { id: parts[0] || null, param: parts[1] ? decodeURIComponent(parts[1]) : null };
 }
 
 async function render() {
@@ -37,7 +39,7 @@ async function render() {
   clear(viewEl);
   window.scrollTo(0, 0);
 
-  const routeId = parseRoute();
+  const { id: routeId, param } = parseRoute();
 
   if (!routeId) {
     viewEl.dataset.route = 'hub';
@@ -48,6 +50,19 @@ async function render() {
   if (routeId === 'stats') {
     viewEl.dataset.route = 'stats';
     renderStats(viewEl);
+    return;
+  }
+
+  if (routeId === 'classement') {
+    viewEl.dataset.route = 'classement';
+    renderLeaderboard(viewEl);
+    return;
+  }
+
+  // Lien d'invitation à un groupe : #/groupe/ABC123
+  if (routeId === 'groupe' && param) {
+    viewEl.dataset.route = 'groupe';
+    renderGroupInvite(viewEl, param);
     return;
   }
 

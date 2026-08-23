@@ -21,3 +21,14 @@ export const TZ = 'Europe/Paris';
 // (ex : 'https://lesjeuxauburo.netlify.app') — indispensable pour que les
 // partages depuis l'app iOS pointent vers une vraie adresse.
 export const SITE_URL = 'https://lesjeuxauburo.fr/';
+
+// --- Classements (Supabase) ---
+// Ces deux valeurs sont **publiques par conception** : elles vivent dans le
+// code du site, et la sécurité repose sur les politiques d'accès du schéma
+// (voir supabase/schema.sql), pas sur leur secret. La clé « service_role »,
+// elle, ne doit jamais apparaître ici.
+export const SUPABASE_URL = 'https://nhejzeslzefinbpexfcq.supabase.co';
+export const SUPABASE_KEY = 'sb_publishable__0_eC5ailkbvtqOoy9c66Q_wscAUvJg';
+
+// Le classement est facultatif : sans connexion, le jeu fonctionne comme avant.
+export const LEADERBOARD_ENABLED = true;

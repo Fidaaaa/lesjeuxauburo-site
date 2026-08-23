@@ -27,7 +27,7 @@ export function renderHub(view) {
   bindCountdown(countdownValue);
   const hero = el('header.hub__hero', {}, [
     el('h1.hub__brand', {}, [
-      el('span.hub__brand-emoji', { 'aria-hidden': 'true', text: '☕' }),
+      el('img.hub__brand-logo', { src: 'assets/logo.png', alt: '', width: 56, height: 56 }),
       ' lesjeuxauburo',
     ]),
     el('p.hub__tagline', { text: `La pause café en ${AVAILABLE_GAMES.length} mini-jeux. Nouveaux puzzles chaque jour à 2h.` }),
@@ -61,6 +61,7 @@ export function renderHub(view) {
   hub.append(hero, tourneeCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
     el('footer.hub__footer', {}, [
       el('a.hub__stats-link', { href: '#/stats', text: '📊 Mes statistiques' }),
+      el('a.hub__stats-link', { href: '#/classement', text: '🏆 Classement du mois' }),
       el('div.hub__links', {}, [
         el('a', { href: 'support.html', text: 'Aide' }),
         ' · ',

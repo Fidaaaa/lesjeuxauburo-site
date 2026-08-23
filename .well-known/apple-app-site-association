@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["WN464C6Q39.com.lesjeuxauburo.app"],
+        "components": [
+          {
+            "/": "/rejoindre.html",
+            "?": { "g": "?*" },
+            "comment": "Invitation à un groupe : ouvre l'app si elle est installée"
+          }
+        ]
+      }
+    ]
+  }
+}

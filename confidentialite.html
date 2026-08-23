@@ -4,61 +4,144 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Confidentialité — lesjeuxauburo</title>
-  <meta name="description" content="lesjeuxauburo ne collecte aucune donnée. Tout reste sur votre appareil." />
+  <meta name="description" content="Ce que lesjeuxauburo enregistre, où, et comment tout effacer. Jouer ne demande aucun compte." />
   <meta name="theme-color" content="#e9edf3" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%E2%98%95</text></svg>" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/art/icon-192.png" />
   <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body>
   <header class="topbar">
-    <a class="topbar__brand" href="index.html"><span aria-hidden="true">☕</span> lesjeuxauburo</a>
+    <a class="topbar__brand" href="index.html">
+      <img class="topbar__logo" src="assets/logo.png" alt="" width="26" height="26" /> lesjeuxauburo
+    </a>
   </header>
 
   <main class="view page">
     <h1 class="page__title">Politique de confidentialité</h1>
-    <p class="page__date">Dernière mise à jour : 22 août 2026</p>
+    <p class="page__date">Dernière mise à jour : 24 août 2026</p>
 
     <section class="page__card">
       <h2>En résumé</h2>
-      <p><strong>lesjeuxauburo ne collecte aucune donnée.</strong> Le jeu fonctionne
-      entièrement sur votre appareil : il n'envoie rien, ne reçoit rien, et ne sait
-      rien de vous.</p>
+      <p><strong>Jouer ne demande aucun compte et n'envoie rien.</strong> Les dix jeux
+      fonctionnent entièrement sur votre appareil, hors ligne.</p>
+      <p>Une seule fonctionnalité sort de l'appareil : le <strong>classement</strong>,
+      facultatif. Si vous l'utilisez, un compte est créé et trois informations sont
+      enregistrées sur un serveur : un identifiant, un pseudo, et la liste des jeux
+      que vous avez réussis. Rien d'autre.</p>
     </section>
 
-    <h2>Ce qui est enregistré</h2>
-    <p>Pour que vous retrouviez vos parties, le jeu conserve
-    <strong>sur votre appareil uniquement</strong> :</p>
+    <h2>Ce qui reste sur votre appareil</h2>
+    <p>Que vous ayez un compte ou non, le jeu conserve localement :</p>
     <ul>
       <li>vos parties du jour en cours et leurs résultats ;</li>
       <li>vos statistiques par jeu (parties jouées, victoires, séries) ;</li>
-      <li>votre préférence de thème (clair, sombre ou automatique).</li>
+      <li>votre préférence de thème (clair, sombre ou automatique) ;</li>
+      <li>le fait que vous ayez déjà vu la présentation et les règles.</li>
     </ul>
-    <p>Sur le site, ces informations vivent dans le stockage local de votre
-    navigateur. Dans l'application iOS, dans l'espace privé de l'app. Elles ne
-    quittent jamais votre appareil et nous n'y avons aucun accès.</p>
+    <p>Sur le site, ces informations vivent dans le stockage local de votre navigateur.
+    Dans l'application, dans l'espace privé de l'app, avec une copie facultative dans
+    <strong>votre</strong> iCloud (celui de votre compte Apple, auquel nous n'avons pas
+    accès) pour que la progression survive à une réinstallation.</p>
+
+    <h2>Le classement, si vous l'utilisez</h2>
+    <p>Le classement est <strong>facultatif</strong> : sans lui, aucune donnée ne quitte
+    votre appareil. Si vous choisissez d'y participer, voici exactement ce qui est
+    enregistré.</p>
+
+    <h3>Les données</h3>
+    <table class="page__table">
+      <tr><th>Donnée</th><th>Pourquoi</th><th>Conservation</th></tr>
+      <tr>
+        <td>Un identifiant de compte (suite de caractères aléatoires)</td>
+        <td>Rattacher vos points à vous</td>
+        <td>Jusqu'à suppression du compte</td>
+      </tr>
+      <tr>
+        <td>Votre pseudo</td>
+        <td>C'est ce qui s'affiche au classement</td>
+        <td>Jusqu'à suppression du compte</td>
+      </tr>
+      <tr>
+        <td>La liste des jeux réussis, avec leur date</td>
+        <td>Compter les points du mois</td>
+        <td>Jusqu'à suppression du compte</td>
+      </tr>
+      <tr>
+        <td>Votre adresse e-mail, <em>seulement</em> si vous vous connectez avec Apple ou Google</td>
+        <td>Vous reconnaître d'une session à l'autre</td>
+        <td>Jusqu'à suppression du compte</td>
+      </tr>
+      <tr>
+        <td>Les groupes que vous avez rejoints</td>
+        <td>Afficher le classement de vos groupes</td>
+        <td>Jusqu'à ce que vous les quittiez</td>
+      </tr>
+    </table>
+
+    <h3>Trois façons d'entrer</h3>
+    <ul>
+      <li><strong>Sans vous identifier</strong> : un compte anonyme est créé et un pseudo
+      tiré au sort (« employe_b42cj »). Aucune adresse, aucun nom, rien qui vous relie à
+      votre identité réelle. Ce compte vit dans ce navigateur ou sur cet appareil.</li>
+      <li><strong>Avec Apple</strong> : Apple nous transmet un identifiant et une adresse
+      e-mail, que vous pouvez choisir de masquer derrière une adresse relais.</li>
+      <li><strong>Avec Google</strong> : Google nous transmet un identifiant et votre
+      adresse e-mail.</li>
+    </ul>
+    <p>Dans tous les cas, <strong>votre nom réel n'est jamais affiché</strong> : seul le
+    pseudo que vous choisissez apparaît au classement.</p>
+
+    <h3>Où sont ces données</h3>
+    <p>Chez <strong>Supabase</strong>, notre hébergeur de base de données, sur des
+    serveurs situés dans l'<strong>Union européenne</strong>. Supabase agit comme
+    sous-traitant au sens du RGPD et n'utilise ces données que pour les héberger.</p>
+
+    <h3>Les groupes privés</h3>
+    <p>Un groupe est visible de ses seuls membres : personne d'autre ne peut lire qui en
+    fait partie ni quels sont leurs points. Si le créateur a défini un mot de passe,
+    celui-ci est <strong>haché</strong> avant enregistrement — nous ne pouvons pas le
+    relire, et ne pourrons donc jamais vous le rappeler.</p>
 
     <h2>Ce qui n'est pas fait</h2>
     <ul>
-      <li>Aucun compte, aucune inscription, aucune adresse e-mail demandée.</li>
       <li>Aucun traceur, aucune publicité, aucune mesure d'audience.</li>
+      <li>Aucune donnée vendue, louée ou partagée avec un tiers à des fins commerciales.</li>
+      <li>Aucun profilage, aucune décision automatisée.</li>
       <li>Aucun accès aux contacts, photos, position, micro ou caméra.</li>
-      <li>Aucune donnée vendue ou partagée — puisqu'aucune n'est collectée.</li>
+      <li>Aucun compte exigé pour jouer : les dix jeux restent entiers sans.</li>
     </ul>
 
     <h2>Supprimer vos données</h2>
-    <p>Deux moyens, à votre main :</p>
     <ul>
-      <li>dans le jeu : <strong>Mes statistiques</strong> → <em>Réinitialiser mes statistiques</em> ;</li>
-      <li>ou en désinstallant l'application (ou en vidant les données du site),
-      ce qui efface tout.</li>
+      <li><strong>Vos données locales</strong> : <em>Mes statistiques</em> →
+      <em>Réinitialiser mes statistiques</em>, ou désinstallez l'application / videz les
+      données du site.</li>
+      <li><strong>Votre compte et vos points</strong> : <em>Classement</em> →
+      <em>Supprimer mon compte</em>. La suppression est immédiate et définitive : pseudo,
+      points et appartenances aux groupes partent avec.</li>
     </ul>
 
+    <h2>Vos droits</h2>
+    <p>Le RGPD vous donne un droit d'accès, de rectification, d'effacement, de limitation
+    et de portabilité sur vos données, ainsi que le droit de vous opposer à leur
+    traitement. L'effacement se fait en un bouton (ci-dessus) ; pour tout le reste,
+    écrivez-nous et nous répondrons sous trente jours. Vous pouvez également saisir la
+    <a href="https://www.cnil.fr">CNIL</a> si vous estimez vos droits méconnus.</p>
+    <p>La base légale du traitement est votre <strong>consentement</strong>, donné en
+    créant un compte, et retirable à tout moment en le supprimant.</p>
+
     <h2>Enfants</h2>
-    <p>Le jeu convient à tous les publics. Comme il ne collecte aucune donnée, il
-    n'en collecte évidemment aucune concernant les enfants.</p>
+    <p>Le jeu convient à tous les publics. Il ne demande aucune donnée pour être joué. La
+    création d'un compte de classement suppose l'accord d'un parent pour les moins de
+    quinze ans.</p>
+
+    <h2>Modifications</h2>
+    <p>Cette politique évoluera si le jeu évolue. La date en haut de page indique la
+    dernière révision ; les changements notables seront annoncés dans l'application.</p>
 
     <h2>Contact</h2>
-    <p>Une question ? <a href="mailto:fida.mili@gmail.com">fida.mili@gmail.com</a></p>
+    <p>Responsable du traitement : Fida Mili —
+    <a href="mailto:fida.mili@gmail.com">fida.mili@gmail.com</a></p>
 
     <p class="page__back"><a href="index.html">← Retour au jeu</a></p>
   </main>
