@@ -4,6 +4,7 @@
 import { CONNEXIONS_BANK } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay, seededShuffle } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -51,8 +52,9 @@ function parseGroup(str) {
 }
 
 function todaysPuzzle(dayNumber, dateStr) {
-  const idx = pickForDay(CONNEXIONS_BANK.length, dayNumber, GAME_ID);
-  const groups = CONNEXIONS_BANK[idx].g.map(deobf).map(parseGroup)
+  const entree = scheduledPuzzle(GAME_ID, dateStr)
+    ?? CONNEXIONS_BANK[pickForDay(CONNEXIONS_BANK.length, dayNumber, GAME_ID)];
+  const groups = entree.g.map(deobf).map(parseGroup)
     .sort((a, b) => a.level - b.level);
   const all = groups.flatMap((g) => g.words);
   const shuffled = seededShuffle(all, `${GAME_ID}:${dateStr}`);

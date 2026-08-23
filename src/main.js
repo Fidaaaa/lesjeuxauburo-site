@@ -4,6 +4,7 @@ import { applyTheme, watchSystemTheme, cycleTheme, themeIcon, themeLabel } from 
 import { startRouter, navigate } from './core/router.js';
 import { requestPersistentStorage } from './core/persistence.js';
 import { maybeShowOnboarding } from './ui/onboarding.js';
+import { primeSchedule } from './core/schedule.js';
 import { captureRedirect } from './core/account.js';
 
 function setupTopbar() {
@@ -48,6 +49,10 @@ function init() {
   // la première ligne de défense ; l'installation sur l'écran d'accueil (voir
   // core/persistence.js) est la seconde, décisive sur iPhone.
   requestPersistentStorage();
+
+  // Le calendrier des puzzles, quinze jours d'avance. Silencieux : sans réseau,
+  // les banques embarquées prennent le relais et le jeu ne s'en aperçoit pas.
+  primeSchedule().catch(() => {});
 
   // Service worker : jeu disponible hors ligne. Absent en http:// non sécurisé,
   // d'où le garde-fou — le site reste parfaitement jouable sans lui.

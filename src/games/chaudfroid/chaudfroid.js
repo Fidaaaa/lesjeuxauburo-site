@@ -7,6 +7,7 @@ import {
 } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -110,9 +111,12 @@ function buildNeighbours(secret) {
   return ordered.slice(0, CF_LIST_SIZE);
 }
 
-function todaysSecret(dayNumber) {
-  const idx = pickForDay(CHAUDFROID_BANK.length, dayNumber, GAME_ID);
-  const secret = deobf(CHAUDFROID_BANK[idx]);
+function todaysSecret(dayNumber, dateStr) {
+  // Les voisins sont reconstruits ici, jamais transportés : ce serait des
+  // méga-octets pour rien, et l'algorithme est le même des deux côtés.
+  const encode = scheduledPuzzle(GAME_ID, dateStr)
+    ?? CHAUDFROID_BANK[pickForDay(CHAUDFROID_BANK.length, dayNumber, GAME_ID)];
+  const secret = deobf(encode);
   const list = buildNeighbours(secret);
   const rank = new Map();
   list.forEach((w, i) => rank.set(w, i + 1));
@@ -124,7 +128,7 @@ export default {
   name: 'Chaud-Froid',
 
   mount(view, ctx) {
-    const { secret, rank } = todaysSecret(ctx.dayNumber);
+    const { secret, rank } = todaysSecret(ctx.dayNumber, ctx.dateStr);
     let state = loadGameState(GAME_ID, ctx.dateStr) || { guesses: [], found: false, revealed: false, status: 'playing' };
 
     clear(view);

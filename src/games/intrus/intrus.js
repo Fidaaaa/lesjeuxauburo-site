@@ -5,6 +5,7 @@
 import { INTRUS_BANK } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay, seededShuffle } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -41,8 +42,8 @@ const LOSE_MESSAGES = [
 ];
 
 function todaysPuzzle(dayNumber, dateStr) {
-  const idx = pickForDay(INTRUS_BANK.length, dayNumber, GAME_ID);
-  const p = INTRUS_BANK[idx];
+  const p = scheduledPuzzle(GAME_ID, dateStr)
+    ?? INTRUS_BANK[pickForDay(INTRUS_BANK.length, dayNumber, GAME_ID)];
   return {
     words: seededShuffle(p.w, `${GAME_ID}:${dateStr}`),
     intruder: deobf(p.i),

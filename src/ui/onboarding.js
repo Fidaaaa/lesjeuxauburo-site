@@ -33,16 +33,21 @@ const SLIDES = [
   },
   {
     emoji: '🔒',
-    title: 'Rien à créer, rien à donner',
-    text: () => 'Aucun compte, aucune publicité, aucune donnée collectée : ta progression '
-      + 'reste sur cet appareil. Tout fonctionne hors ligne.',
+    title: 'Jouer ne demande rien',
+    text: () => 'Pas de compte, pas de publicité, pas de traceur : les dix jeux tournent '
+      + 'sur ton appareil, même hors ligne, et ta progression y reste.',
+    note: () => 'Une seule chose sort d’ici, et seulement si tu la demandes : le classement. '
+      + 'On t’expliquera à l’écran suivant.',
+    lien: { texte: 'Lire la politique de confidentialité', href: 'confidentialite.html' },
   },
   {
     emoji: '🏆',
     title: 'Jouer avec les autres',
     text: () => 'Un point par jeu réussi, un classement remis à zéro chaque mois, et des '
-      + 'groupes privés pour ton bureau. Facultatif : sans compte, tout le reste '
-      + 'fonctionne pareil.',
+      + 'groupes privés pour ton bureau. C’est la seule fonction qui a besoin d’un '
+      + 'compte — et du réseau.',
+    note: () => 'Ce qui part alors : un identifiant, ton pseudo, et la liste des jeux que '
+      + 'tu as réussis. Rien d’autre, jamais revendu. Tu peux tout effacer en un bouton.',
     auth: true,
   },
 ];
@@ -68,6 +73,8 @@ export function showOnboarding() {
   const media = el('div.onboarding__media', { 'aria-hidden': 'true' });
   const title = el('h2.onboarding__title');
   const text = el('p.onboarding__text');
+  const note = el('p.onboarding__note');
+  const lien = el('p.onboarding__lien');
   const dots = el('div.onboarding__dots', { 'aria-hidden': 'true' });
   const next = el('button.btn.btn--primary.onboarding__next', { type: 'button' });
   const skip = el('button.onboarding__skip', { type: 'button', text: 'Passer' });
@@ -89,6 +96,14 @@ export function showOnboarding() {
       : el('span.onboarding__emoji', { text: slide.emoji }));
     title.textContent = slide.title;
     text.textContent = slide.text();
+    note.textContent = slide.note ? slide.note() : '';
+    note.hidden = !slide.note;
+    clear(lien);
+    lien.hidden = !slide.lien;
+    if (slide.lien) {
+      lien.append(el('a', { href: slide.lien.href, text: slide.lien.texte, target: '_blank',
+                            rel: 'noopener' }));
+    }
 
     clear(dots);
     SLIDES.forEach((_, i) => dots.append(el('span.onboarding__dot', { 'data-on': i === index ? '1' : '0' })));
@@ -128,7 +143,7 @@ export function showOnboarding() {
     if (e.key === 'ArrowLeft' && index > 0) { index -= 1; render(); }
   });
 
-  panel.append(media, title, text, dots, authSlot, next, skip);
+  panel.append(media, title, text, note, lien, dots, authSlot, next, skip);
   overlay.append(panel);
   document.body.append(overlay);
   document.body.classList.add('modal-open');

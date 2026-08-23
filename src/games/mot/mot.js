@@ -5,6 +5,7 @@ import { MOT_BANK } from './data.js';
 import { DICTIONARY } from '../../data/dictionary_fr.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -52,7 +53,9 @@ const LOSE_MESSAGES = [
 
 // --- Logique ---
 
-function todaysAnswer(dayNumber) {
+function todaysAnswer(dayNumber, dateStr) {
+  const publie = scheduledPuzzle(GAME_ID, dateStr);
+  if (publie) return deobf(publie).toUpperCase();
   const idx = pickForDay(MOT_BANK.length, dayNumber, GAME_ID);
   return deobf(MOT_BANK[idx]).toUpperCase();
 }
@@ -100,7 +103,7 @@ export default {
   name: 'Le Mot',
 
   mount(view, ctx) {
-    const answer = todaysAnswer(ctx.dayNumber);
+    const answer = todaysAnswer(ctx.dayNumber, ctx.dateStr);
     const N = answer.length;
     const firstLetter = answer[0];
 

@@ -4,6 +4,7 @@
 
 import { PAYS } from './data.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -99,7 +100,9 @@ function findCountry(input) {
   return null;
 }
 
-function todaysCountry(dayNumber) {
+function todaysCountry(dayNumber, dateStr) {
+  const publie = scheduledPuzzle(GAME_ID, dateStr);
+  if (publie) return publie;
   const answers = PAYS.filter((p) => p.d);
   const idx = pickForDay(answers.length, dayNumber, GAME_ID);
   return answers[idx];
@@ -110,7 +113,7 @@ export default {
   name: 'Le Pays',
 
   mount(view, ctx) {
-    const answer = todaysCountry(ctx.dayNumber);
+    const answer = todaysCountry(ctx.dayNumber, ctx.dateStr);
     let state = loadGameState(GAME_ID, ctx.dateStr) || { guesses: [], status: 'playing' };
 
     clear(view);

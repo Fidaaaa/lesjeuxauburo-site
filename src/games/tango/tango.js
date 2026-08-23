@@ -6,6 +6,7 @@
 import { TANGO_BANK } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -52,8 +53,9 @@ function parseConstraints(raw) {
   });
 }
 
-function todaysPuzzle(dayNumber) {
-  const p = TANGO_BANK[pickForDay(TANGO_BANK.length, dayNumber, GAME_ID)];
+function todaysPuzzle(dayNumber, dateStr) {
+  const p = scheduledPuzzle(GAME_ID, dateStr)
+    ?? TANGO_BANK[pickForDay(TANGO_BANK.length, dayNumber, GAME_ID)];
   return { given: p.g, constraints: parseConstraints(p.c), solution: deobf(p.k) };
 }
 
@@ -94,7 +96,7 @@ export default {
   name: 'Tango',
 
   mount(view, ctx) {
-    const puz = todaysPuzzle(ctx.dayNumber);
+    const puz = todaysPuzzle(ctx.dayNumber, ctx.dateStr);
     const locked = new Set();
     puz.given.split('').forEach((v, i) => { if (v !== EMPTY) locked.add(i); });
     const blanks = N * N - locked.size;

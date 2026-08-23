@@ -6,6 +6,7 @@
 import { GAUFRE_BANK, GAUFRE_SWAPS } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -57,8 +58,9 @@ const WORDS = (() => {
   return words;
 })();
 
-function todaysPuzzle(dayNumber) {
-  const p = GAUFRE_BANK[pickForDay(GAUFRE_BANK.length, dayNumber, GAME_ID)];
+function todaysPuzzle(dayNumber, dateStr) {
+  const p = scheduledPuzzle(GAME_ID, dateStr)
+    ?? GAUFRE_BANK[pickForDay(GAUFRE_BANK.length, dayNumber, GAME_ID)];
   return { start: p.d, solution: deobf(p.k), par: p.p };
 }
 
@@ -96,7 +98,7 @@ export default {
   name: 'La Gaufre',
 
   mount(view, ctx) {
-    const puz = todaysPuzzle(ctx.dayNumber);
+    const puz = todaysPuzzle(ctx.dayNumber, ctx.dateStr);
     let state = loadGameState(GAME_ID, ctx.dateStr)
       || { letters: puz.start, swaps: 0, status: 'playing' };
     if (state.letters.length !== puz.start.length) {

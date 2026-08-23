@@ -7,6 +7,7 @@ import { BOITE_BANK } from './data.js';
 import { DICTIONARY } from '../../data/dictionary_fr.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -38,8 +39,9 @@ const WIN_MESSAGES = [
   'Joli parcours de lettres. Bravo ! 🎯',
 ];
 
-function todaysPuzzle(dayNumber) {
-  const p = BOITE_BANK[pickForDay(BOITE_BANK.length, dayNumber, GAME_ID)];
+function todaysPuzzle(dayNumber, dateStr) {
+  const p = scheduledPuzzle(GAME_ID, dateStr)
+    ?? BOITE_BANK[pickForDay(BOITE_BANK.length, dayNumber, GAME_ID)];
   const sideOf = {};
   p.s.forEach((side, index) => { for (const ch of side) sideOf[ch] = index; });
   return { sides: p.s, sideOf, solution: deobf(p.k).split('|') };
@@ -54,7 +56,7 @@ export default {
   name: 'La Boîte à Lettres',
 
   mount(view, ctx) {
-    const puz = todaysPuzzle(ctx.dayNumber);
+    const puz = todaysPuzzle(ctx.dayNumber, ctx.dateStr);
     const allLetters = new Set(Object.keys(puz.sideOf));
     let state = loadGameState(GAME_ID, ctx.dateStr) || { words: [], status: 'playing' };
 

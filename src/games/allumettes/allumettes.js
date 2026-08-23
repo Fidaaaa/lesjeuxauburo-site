@@ -5,6 +5,7 @@
 
 import { ALLUMETTES_BANK } from './data.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -171,7 +172,9 @@ function solve(startCells, need) {
   return best;
 }
 
-function todaysPuzzle(dayNumber) {
+function todaysPuzzle(dayNumber, dateStr) {
+  const publie = scheduledPuzzle(GAME_ID, dateStr);
+  if (publie) return publie;
   const idx = pickForDay(ALLUMETTES_BANK.length, dayNumber, GAME_ID);
   return ALLUMETTES_BANK[idx];
 }
@@ -181,7 +184,7 @@ export default {
   name: 'Les Allumettes',
 
   mount(view, ctx) {
-    const puzzle = todaysPuzzle(ctx.dayNumber);
+    const puzzle = todaysPuzzle(ctx.dayNumber, ctx.dateStr);
     const need = puzzle.n;
     const startCells = parseStart(puzzle.e);
 

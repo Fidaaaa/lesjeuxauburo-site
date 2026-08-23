@@ -5,6 +5,7 @@
 
 import { EVASION_BANK } from './data.js';
 import { pickForDay } from '../../core/rng.js';
+import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
 import { el, clear } from '../../core/dom.js';
 import { loadGameState, saveGameState, loadResult, saveResult, recordStats } from '../../core/storage.js';
@@ -99,8 +100,9 @@ function parsePuzzle(p) {
   return { R, C, blocked, pieces, goal, target: p.t };
 }
 
-function todaysPuzzle(dayNumber) {
-  return EVASION_BANK[pickForDay(EVASION_BANK.length, dayNumber, GAME_ID)];
+function todaysPuzzle(dayNumber, dateStr) {
+  return scheduledPuzzle(GAME_ID, dateStr)
+    ?? EVASION_BANK[pickForDay(EVASION_BANK.length, dayNumber, GAME_ID)];
 }
 
 export default {
@@ -108,7 +110,7 @@ export default {
   name: 'L\'Évasion',
 
   mount(view, ctx) {
-    const raw = todaysPuzzle(ctx.dayNumber);
+    const raw = todaysPuzzle(ctx.dayNumber, ctx.dateStr);
     const par = raw.m;
     const puz = parsePuzzle(raw);
     const { R, C, blocked, goal } = puz;
