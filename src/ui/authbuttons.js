@@ -22,9 +22,14 @@ const SWITCH_WARNING = 'Attention : tu joues actuellement sans identification. T
 /**
  * @param {object} options
  * @param {() => void} options.onSignedIn  appelé après une connexion réussie
+ * @param {() => void} [options.onLeaving] appelé juste avant de quitter la page
+ *   pour Apple ou Google. Indispensable depuis l'onboarding : la connexion se
+ *   fait par redirection, donc rien de ce qui suit ne s'exécutera. Sans ça,
+ *   l'onboarding se rouvrait au retour, en boucle.
  * @param {boolean} [options.upgrading]    vrai si le joueur est déjà invité
  */
-export function authChoices({ onSignedIn, upgrading = isAnonymous() }) {
+export function authChoices({ onSignedIn, onLeaving, upgrading = isAnonymous() }) {
+  const leave = (provider) => { onLeaving?.(); signIn(provider); };
   const box = el('div.auth');
 
   if (upgrading) {
@@ -34,11 +39,11 @@ export function authChoices({ onSignedIn, upgrading = isAnonymous() }) {
   box.append(
     el('button.btn.btn--primary', {
       type: 'button', text: 'Se connecter avec Apple',
-      onClick: () => signIn('apple'),
+      onClick: () => leave('apple'),
     }),
     el('button.btn', {
       type: 'button', text: 'Continuer avec Google',
-      onClick: () => signIn('google'),
+      onClick: () => leave('google'),
     }),
   );
 

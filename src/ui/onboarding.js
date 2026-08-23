@@ -98,7 +98,12 @@ export function showOnboarding() {
     clear(authSlot);
     const last = index === SLIDES.length - 1;
     if (slide.auth) {
-      authSlot.append(authChoices({ onSignedIn: finish }));
+      authSlot.append(authChoices({
+        onSignedIn: finish,
+        // La connexion Apple ou Google quitte la page : on retient dès
+        // maintenant que l'onboarding a été vu, sinon il se rouvre au retour.
+        onLeaving: () => savePref(SEEN, '1'),
+      }));
       next.hidden = true;
       skip.hidden = false;
       skip.textContent = 'Plus tard';

@@ -7,7 +7,7 @@ import { el, clear } from '../core/dom.js';
 import { AVAILABLE_GAMES } from '../core/registry.js';
 import {
   isSignedIn, isAnonymous, signIn, signInAnonymously, signOut, myProfile,
-  setPseudo, deleteAccount,
+  setPseudo, deleteAccount, saveProfileDetails,
 } from '../core/account.js';
 import {
   globalRanking, gameRanking, groupRanking, myGroups, createGroup, joinGroup,
@@ -112,7 +112,7 @@ async function renderSignedIn(body) {
     onClick: () => select(v.id),
   })));
 
-  body.append(tabs, panel, accountFooter(body));
+  body.append(tabs, panel, profileDetails(profile), accountFooter(body));
   select(active);
 }
 
@@ -410,6 +410,51 @@ function errorCard(error) {
       ? 'Pas de réseau : le classement s’affichera à la prochaine connexion. Tes points sont gardés.'
       : `Le classement n’a pas répondu : ${error.message}` }),
   ]);
+}
+
+/**
+ * Renseignements facultatifs. Repliés par défaut : personne ne doit avoir
+ * l'impression qu'il reste un formulaire à remplir pour jouer.
+ */
+function profileDetails(profile) {
+  const box = el('details.board__profile');
+  box.append(el('summary', { text: 'Mon profil (facultatif)' }));
+
+  const prenom = el('input.cf-input', { type: 'text', placeholder: 'Prénom',
+    maxlength: '40', autocomplete: 'given-name', value: profile.prenom ?? '' });
+  const nom = el('input.cf-input', { type: 'text', placeholder: 'Nom',
+    maxlength: '40', autocomplete: 'family-name', value: profile.nom ?? '' });
+  const annee = el('input.cf-input', { type: 'text', inputmode: 'numeric',
+    placeholder: 'Année de naissance', maxlength: '4',
+    value: profile.annee_naissance ?? '' });
+
+  const save = el('button.btn.btn--primary', { type: 'submit', text: 'Enregistrer' });
+  const form = el('form.board__form', {
+    onSubmit: async (e) => {
+      e.preventDefault();
+      save.disabled = true;
+      try {
+        await saveProfileDetails({ prenom: prenom.value, nom: nom.value,
+                                   anneeNaissance: annee.value });
+        toast('Profil enregistré');
+      } catch (error) {
+        toast(error.message);
+      }
+      save.disabled = false;
+    },
+  }, [
+    el('p.board__note', { text: 'Rien de tout cela n’est obligatoire, et rien n’apparaît '
+      + 'au classement — seul ton pseudo est visible des autres joueurs. Ces informations '
+      + 'servent uniquement à savoir qui joue. Vide un champ pour l’effacer.' }),
+    prenom, nom, annee,
+    profile.email
+      ? el('p.board__note', { text: `Adresse liée à ton compte : ${profile.email}` })
+      : el('p.board__note', { text: 'Aucune adresse : tu joues sans identification.' }),
+    save,
+  ]);
+
+  box.append(form);
+  return box;
 }
 
 function accountFooter(body) {

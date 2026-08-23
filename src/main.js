@@ -34,14 +34,15 @@ if (document.readyState === 'loading') {
 function init() {
   // Retour d'une connexion Apple ou Google : les jetons arrivent dans le
   // fragment d'URL. À traiter avant le routeur, qui le lirait comme une route.
-  captureRedirect();
+  const revenantDeConnexion = captureRedirect();
 
   applyTheme();
   setupTopbar();
   startRouter(document.getElementById('view'));
 
-  // Première visite : on présente le principe avant de laisser le hub.
-  maybeShowOnboarding();
+  // Première visite : on présente le principe avant de laisser le hub. Jamais
+  // au retour d'une connexion — le joueur vient précisément de le traverser.
+  if (!revenantDeConnexion) maybeShowOnboarding();
 
   // Demande au navigateur de ne pas évincer la progression. Sans compte, c'est
   // la première ligne de défense ; l'installation sur l'écran d'accueil (voir

@@ -238,8 +238,29 @@ export function rpc(name, args = {}) {
 export async function myProfile() {
   const id = currentUserId();
   if (!id) return null;
-  const rows = await request(`/rest/v1/profils?id=eq.${id}&select=pseudo`);
+  const rows = await request(
+    `/rest/v1/profils?id=eq.${id}&select=pseudo,prenom,nom,email,annee_naissance`);
   return rows?.[0] ?? null;
+}
+
+/**
+ * Enregistre les renseignements facultatifs. Un champ vidé est effacé, pas
+ * ignoré : c'est la seule façon de se rétracter.
+ */
+export async function saveProfileDetails({ prenom, nom, anneeNaissance }) {
+  const id = currentUserId();
+  if (!id) throw new Error('connexion requise');
+  const annee = String(anneeNaissance ?? '').trim();
+  if (annee && !/^\d{4}$/.test(annee)) throw new Error('Année de naissance : quatre chiffres');
+  await request(`/rest/v1/profils?id=eq.${id}`, {
+    method: 'PATCH',
+    body: {
+      prenom: prenom?.trim() || null,
+      nom: nom?.trim() || null,
+      annee_naissance: annee ? Number(annee) : null,
+    },
+    headers: { Prefer: 'return=minimal' },
+  });
 }
 
 /**

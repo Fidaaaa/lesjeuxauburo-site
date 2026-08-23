@@ -818,6 +818,12 @@ body.modal-open { overflow: hidden; }
   user-select: all;
 }
 .board__account { display: grid; gap: .2rem; margin-top: 1.6rem; }
+.board__profile {
+  margin-top: 1.4rem; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .8rem .9rem;
+}
+.board__profile summary { cursor: pointer; font-weight: 700; font-size: .92rem; }
+.board__profile[open] summary { margin-bottom: .7rem; }
 
 /* ---------- Blocs de connexion (onboarding + classement) ---------- */
 .auth { display: grid; gap: .55rem; }
