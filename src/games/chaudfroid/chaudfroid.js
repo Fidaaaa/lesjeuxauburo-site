@@ -29,14 +29,36 @@ const HOW_TO = {
       <li><span class="chip" style="background:#5b8fd1">🔵</span> <strong>Froid</strong></li>
     </ul>
     <p>Un <strong>thermomètre de -20° (glacial) à 99° (tout proche)</strong> indique ta chaleur. Essais illimités, l'historique se trie du plus chaud au plus froid.</p>
+    <p>Le jeu s'appuie sur un vocabulaire de <strong>noms communs courants</strong>.
+    Un mot qu'il ne connaît pas est refusé plutôt que noté « froid » — mieux vaut
+    te le dire que te laisser croire que tu t'éloignes.</p>
   `,
 };
 
+// Température affichée : -20° (glacial) à 99° (tout proche).
+//
+// L'échelle ne court que sur les cercles sémantiques. Au-delà, la liste est
+// classée par ordre **alphabétique** : y étaler un dégradé donnerait au joueur
+// un signal qui n'existe pas — « abricot » ne serait pas plus proche de
+// « moto » que « zèbre ». Tous ces mots partagent donc le même -20°, ce qui est
+// la seule chose vraie qu'on puisse en dire.
+export const CF_CAP = CF_LIST_SIZE; // fin des cercles utiles
+export function tempFor(rank) {
+  if (rank == null || rank > CF_CAP) return -20;
+  const t = Math.round(99 - (rank - 2) * (114 / (CF_CAP - 2)));
+  return Math.max(-15, Math.min(99, t));
+}
+
+// Les paliers se lisent sur la **température**, pas sur le rang.
+//
+// Les deux étaient réglés séparément, et ils se contredisaient : le rang 131
+// sortait « 🔵 Froid » avec 53° affichés à côté. Une seule échelle, dérivée du
+// thermomètre, rend la contradiction impossible.
 const BANDS = [
-  { name: 'Brûlant', emoji: '🔥', cls: 'brulant', max: 13 },
-  { name: 'Chaud', emoji: '🟠', cls: 'chaud', max: 45 },
-  { name: 'Tiède', emoji: '🟡', cls: 'tiede', max: 130 },
-  { name: 'Froid', emoji: '🔵', cls: 'froid', max: Infinity },
+  { name: 'Brûlant', emoji: '🔥', cls: 'brulant', min: 90 },
+  { name: 'Chaud', emoji: '🟠', cls: 'chaud', min: 70 },
+  { name: 'Tiède', emoji: '🟡', cls: 'tiede', min: 35 },
+  { name: 'Froid', emoji: '🔵', cls: 'froid', min: -Infinity },
 ];
 
 const WIN_MESSAGES = [
@@ -51,23 +73,26 @@ function normalize(s) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-function bandFor(rank) {
-  if (rank == null) return { name: 'Froid', emoji: '🔵', cls: 'froid', rank: '>1000' };
-  for (const b of BANDS) if (rank <= b.max) return { ...b, rank };
+// Un mot que le jeu ne connaît pas n'est pas « froid » : il est hors sujet.
+// Les confondre était le défaut du jeu — proposer « transport » ou « roue »
+// pour « moto » renvoyait −20°, exactement comme un mot sans aucun rapport, et
+// le joueur en concluait qu'il faisait fausse route alors qu'il brûlait.
+//
+// Ce cas ne se produit plus à la saisie (les mots inconnus sont refusés), mais
+// les parties déjà enregistrées en contiennent : on les affiche pour ce qu'ils
+// sont.
+const HORS_VOCABULAIRE = { name: 'Inconnu', emoji: '❔', cls: 'inconnu', rank: '—' };
+
+export function bandFor(rank) {
+  if (rank == null) return { ...HORS_VOCABULAIRE };
+  const t = tempFor(rank);
+  for (const b of BANDS) if (t >= b.min) return { ...b, rank };
   return { ...BANDS[BANDS.length - 1], rank };
 }
 
-function proximityPct(rank) {
-  if (rank == null) return 2;
+export function proximityPct(rank) {
+  if (rank == null || rank > CF_CAP) return 2;
   return Math.max(3, Math.round(100 * (1 - (rank - 1) / 300)));
-}
-
-// Température affichée : -20° (glacial, hors liste) à 99° (tout proche).
-const CF_CAP = CF_LIST_SIZE; // même échelle que la liste reconstruite
-function tempFor(rank) {
-  if (rank == null) return -20;
-  const t = Math.round(99 - (rank - 2) * (114 / (CF_CAP - 2)));
-  return Math.max(-15, Math.min(99, t));
 }
 
 // Domaine de chaque catégorie, déduit de CF_DOMAINS.
@@ -76,10 +101,18 @@ for (const [domain, names] of Object.entries(CF_DOMAINS)) {
   for (const name of names) DOMAIN_OF[name] = domain;
 }
 
+// Tout ce que le jeu sait nommer : les mots des catégories et le remplissage.
+// Sert à distinguer « loin » de « inconnu » — sans cette liste, les deux se
+// confondent, et le joueur n'a plus aucun signal.
+export const VOCABULAIRE = [...new Set([
+  ...Object.values(CF_CATEGORIES).flat(),
+  ...CF_FILLER,
+])].sort();
+
 // Reconstruit la liste de voisins d'un secret, du plus proche au plus lointain.
-// L'ordre doit rester IDENTIQUE à celui de tools/gen_chaudfroid.py (et du
-// portage Swift) : mêmes tris, mêmes cercles, même remplissage.
-function buildNeighbours(secret) {
+// L'ordre des cercles doit rester IDENTIQUE à celui du portage Swift : mêmes
+// tris, mêmes cercles, même remplissage.
+export function buildNeighbours(secret) {
   const ordered = [];
   const seen = new Set();
   const add = (word) => {
@@ -108,7 +141,13 @@ function buildNeighbours(secret) {
     add(w);
     if (ordered.length >= CF_LIST_SIZE) break;
   }
-  return ordered.slice(0, CF_LIST_SIZE);
+
+  // Au-delà des cercles utiles, le reste du vocabulaire par ordre
+  // alphabétique. Ces mots-là sont loin — la température le dira — mais le jeu
+  // les **connaît**, et c'est toute la différence : les tronquer les renvoyait
+  // dans le même sac que les mots qu'il ignore.
+  for (const w of VOCABULAIRE) add(w);
+  return ordered;
 }
 
 function todaysSecret(dayNumber, dateStr) {
@@ -206,8 +245,17 @@ export default {
       if (!word) { toast('Écris un mot'); return; }
       const existing = state.guesses.find((g) => g.word === word);
       if (existing) { toast('Déjà proposé !'); state.lastWord = word; renderLast(); renderHistory(); return; }
+
+      // Un mot hors vocabulaire est refusé plutôt que noté −20°. Les essais
+      // sont illimités : refuser ne coûte rien au joueur, alors que lui
+      // répondre « froid » lui ment sur la direction à prendre.
+      if (!rank.has(word)) {
+        toast('Ce mot n’est pas dans le jeu — essaie un nom commun courant');
+        return;
+      }
+
       const prevBest = state.guesses.reduce((m, g) => (g.rank != null && g.rank < m ? g.rank : m), Infinity);
-      const r = rank.has(word) ? rank.get(word) : null;
+      const r = rank.get(word);
       state.guesses.push({ word, rank: r });
       state.lastWord = word;
       if (r === 1) {

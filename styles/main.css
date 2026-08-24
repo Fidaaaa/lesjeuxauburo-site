@@ -750,6 +750,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .cf-entry__fill[data-band="chaud"] { background: #e8833a; }
 .cf-entry__fill[data-band="tiede"] { background: #e0a52f; }
 .cf-entry__fill[data-band="froid"] { background: #5b8fd1; }
+/* Hors vocabulaire : ni chaud ni froid, hors sujet. Un gris neutre, distinct
+   du bleu qui, lui, veut dire « loin, mais le jeu connaît ce mot ». */
+.cf-entry__fill[data-band="inconnu"] { background: var(--mot-absent); }
 .cf-entry__row { position: relative; display: flex; align-items: center; gap: .5rem; padding: .55rem .7rem; }
 .cf-entry__word { font-weight: 800; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .cf-entry__band { font-weight: 700; font-size: .85rem; white-space: nowrap; }
