@@ -7,6 +7,7 @@ import { navigate } from '../core/router.js';
 import { loadStats } from '../core/storage.js';
 import { xpFor, multiplierFor, nextPalier, effectiveStreak, XP_BASE } from '../core/xp.js';
 import { getPuzzleDate, addDays } from '../core/date.js';
+import { emplacement } from './pub.js';
 
 /**
  * Ligne d'XP affichée après une victoire.
@@ -89,6 +90,9 @@ export function buildEndPanel({ won, title, message, revealNode, nextGameHint, g
     xp,
     nextGameHint ? el('p.endpanel__hint', { text: nextGameHint }) : null,
     actions,
+    // Après les boutons : la partie est finie, le joueur n'attend plus rien du
+    // jeu. C'est la seule vraie respiration d'un écran de jeu.
+    emplacement('rectangle', 'fin-de-partie'),
     countdown,
   ]);
 }

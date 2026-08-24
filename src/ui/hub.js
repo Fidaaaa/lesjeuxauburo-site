@@ -10,6 +10,7 @@ import { bindHumanCountdown } from './countdown.js';
 import { navigate } from '../core/router.js';
 import { effectiveStreak, multiplierFor, carriere, XP_BASE } from '../core/xp.js';
 import { ecusson } from './ecusson.js';
+import { emplacement, colonneLaterale } from './pub.js';
 import { nombre } from '../core/format.js';
 
 const STATE_BADGE = {
@@ -101,6 +102,9 @@ export function renderHub(view) {
   GAMES.forEach((game, index) => grid.append(gameCard(game, dateStr, index)));
 
   hub.append(hero, tourneeCard, carriereCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
+    // Après la liste des jeux : le regard y arrive une fois le choix fait,
+    // jamais pendant.
+    emplacement('banniere', 'hub-bas'),
     el('footer.hub__footer', {}, [
       el('a.hub__stats-link', { href: '#/stats', text: '📊 Mes statistiques' }),
       el('a.hub__stats-link', { href: '#/classement', text: '🏆 Classement du mois' }),
@@ -111,6 +115,8 @@ export function renderHub(view) {
       ]),
     ]));
   view.append(hub);
+  const rail = colonneLaterale();
+  if (rail) view.append(rail);
 }
 
 // Vignette d'un jeu : l'illustration générée, avec repli sur l'emoji si l'image

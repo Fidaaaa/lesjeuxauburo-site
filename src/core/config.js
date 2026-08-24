@@ -32,3 +32,21 @@ export const SUPABASE_KEY = 'sb_publishable__0_eC5ailkbvtqOoy9c66Q_wscAUvJg';
 
 // Le classement est facultatif : sans connexion, le jeu fonctionne comme avant.
 export const LEADERBOARD_ENABLED = true;
+
+// --- Publicité ---
+// Les emplacements **existent et occupent leur place** dès maintenant, mais
+// restent entièrement transparents tant qu'aucune régie ne les remplit : ni
+// cadre, ni fond, ni mot « Publicité ».
+//
+// C'est un choix de mise en page, pas d'affichage. La hauteur étant déjà prise,
+// brancher une régie plus tard ne déplacera aucun écran d'un pixel — alors
+// qu'un encart qui apparaît après coup pousse le contenu vers le bas, et sur un
+// jeu cela veut dire un doigt qui tape à côté au moment où la grille saute.
+//
+// Rien n'est chargé, personne n'est contacté : la promesse « aucun traceur,
+// aucune publicité » reste donc vraie tant que rien n'est branché.
+//
+// ⚠️ À `false`, les emplacements disparaissent complètement et les écrans se
+//    resserrent. À ne basculer que si l'on renonce définitivement à la
+//    publicité — sinon la mise en page bougera le jour du branchement.
+export const PUB_ENABLED = true;

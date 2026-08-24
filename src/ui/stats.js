@@ -12,6 +12,7 @@ import { carriere, effectiveStreak, multiplierFor, XP_BASE } from '../core/xp.js
 import { getPuzzleDate } from '../core/date.js';
 import { ecusson } from './ecusson.js';
 import { nombre } from '../core/format.js';
+import { emplacement } from './pub.js';
 
 // Ordre d'affichage des clés de répartition, par jeu.
 const DIST_ORDER = {
@@ -104,6 +105,8 @@ export function renderStats(view) {
     el('button.cf-giveup', { type: 'button', text: 'Réinitialiser mes statistiques', onClick: confirmReset }),
   ]));
 
+  const pub = emplacement('banniere', 'stats-bas');
+  if (pub) wrap.append(pub);
   view.append(wrap);
 }
 

@@ -1187,3 +1187,36 @@ body.modal-open { overflow: hidden; }
 .backup__feedback { font-size: .85rem; font-weight: 700; margin-top: .5rem; min-height: 1.2em; }
 .backup__feedback[data-state="ok"] { color: var(--accent); }
 .backup__feedback[data-state="error"] { color: var(--mot-correct); }
+
+/* ---------- Emplacements publicitaires ----------
+   De la place réservée, **entièrement transparente** tant qu'elle est vide :
+   ni cadre, ni fond, ni libellé. Le joueur ne voit qu'un peu d'air.
+
+   Pourquoi occuper la place tout de suite : un encart qui arrive après coup
+   pousse le contenu vers le bas, et sur un jeu cela veut dire un doigt qui
+   tape à côté au moment où la grille saute. La hauteur étant déjà prise,
+   brancher une régie ne déplacera plus rien. */
+.pub {
+  display: grid; place-items: center;
+  width: min(100%, var(--pub-largeur));
+  height: var(--pub-hauteur);
+  margin: 1.4rem auto 0;
+  overflow: hidden;
+  /* Vide : rien à voir, et rien à toucher — sans quoi l'emplacement volerait
+     les gestes de défilement au-dessus d'une zone qui n'affiche rien. */
+  pointer-events: none;
+}
+.pub:not(:empty) { pointer-events: auto; }
+
+/* La colonne latérale — le « autour du site ». Elle n'existe qu'au-delà de
+   1 180 px : en dessous, la colonne de jeu fait 560 px et un grattoir la
+   serrerait. Elle ne défile pas avec la page. */
+.pub-rail { display: none; }
+@media (min-width: 1180px) {
+  .pub-rail {
+    display: block; position: fixed; top: 50%; transform: translateY(-50%);
+    left: max(1rem, calc(50vw - var(--maxw) / 2 - 200px));
+    z-index: 5;
+  }
+  .pub-rail .pub { margin: 0; }
+}
