@@ -11,7 +11,7 @@
 
 // À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
 // sans cela, les visiteurs de retour garderaient l'ancienne version.
-const VERSION = 'v10';
+const VERSION = 'v12';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors
@@ -27,11 +27,11 @@ const SHELL = [
   './src/main.js',
   './assets/office-pattern.svg',
   './assets/logo.svg',
-  './assets/fonts/SpaceGrotesk-Bold.woff2',
-  './assets/fonts/SpaceGrotesk-Medium.woff2',
-  './assets/fonts/Inter-Regular.woff2',
-  './assets/fonts/Inter-SemiBold.woff2',
-  './assets/fonts/Inter-ExtraBold.woff2',
+  './assets/fonts/Fraunces-Bold.woff2',
+  './assets/fonts/Fraunces-SemiBold.woff2',
+  './assets/fonts/InstrumentSans-Regular.woff2',
+  './assets/fonts/InstrumentSans-SemiBold.woff2',
+  './assets/fonts/InstrumentSans-Bold.woff2',
 ];
 
 self.addEventListener('install', (event) => {

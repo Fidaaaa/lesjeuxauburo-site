@@ -12,6 +12,7 @@ import { toast, confetti } from '../../ui/effects.js';
 import { buildEndPanel } from '../../ui/endpanel.js';
 import { maybeShowHowTo, howToButton } from '../../ui/howto.js';
 import { siteUrl } from '../../core/share.js';
+import { nombre } from '../../core/format.js';
 
 const GAME_ID = 'pays';
 const MAX_TRIES = 6;
@@ -176,7 +177,7 @@ export default {
         const correct = g.code === answer.c;
         guessesBox.append(el('div.pays-guess', { 'data-correct': correct ? '1' : '0' }, [
           el('span.pays-guess__name', { text: g.name }),
-          el('span.pays-guess__dist', { text: correct ? '0 km' : `${g.dist.toLocaleString('fr-FR')} km` }),
+          el('span.pays-guess__dist', { text: correct ? '0 km' : `${nombre(g.dist)} km` }),
           el('span.pays-guess__dir', { 'aria-label': correct ? 'trouvé' : `direction ${g.dirName}`, text: correct ? '🎉' : g.dir }),
           el('span.pays-guess__pct', { text: `${g.pct}%` }),
         ]));

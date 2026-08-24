@@ -11,6 +11,7 @@ import { copyText } from '../core/share.js';
 import { carriere, effectiveStreak, multiplierFor, XP_BASE } from '../core/xp.js';
 import { getPuzzleDate } from '../core/date.js';
 import { ecusson } from './ecusson.js';
+import { nombre } from '../core/format.js';
 
 // Ordre d'affichage des clés de répartition, par jeu.
 const DIST_ORDER = {
@@ -62,7 +63,7 @@ export function renderStats(view) {
       el('div', {}, [
         el('div.carriere-detail__titre', { text: poste.titre }),
         el('div.carriere-detail__rang', {
-          text: `Niveau ${poste.rang} sur ${poste.total} · ${poste.xp.toLocaleString('fr-FR')} XP`,
+          text: `Niveau ${poste.rang} sur ${poste.total} · ${nombre(poste.xp)} XP`,
         }),
       ]),
     ]),
@@ -71,7 +72,7 @@ export function renderStats(view) {
     ]),
     el('p.carriere-detail__next', {
       text: poste.suivant
-        ? `Encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} ».`
+        ? `Encore ${nombre(poste.manquant)} XP avant « ${poste.suivant} ».`
         : 'Plus rien au-dessus. La direction, c’est toi.',
     }),
     el('p.carriere-detail__regle', {
@@ -215,7 +216,7 @@ function gameStatCard(g) {
     miniStat(`${pct(s.wins, s.played)}%`, 'victoires'),
     miniStat(`🔥 ${serie}`, facteur > 1 ? `série · ×${facteur}` : 'série'),
     miniStat(`🏆 ${s.maxStreak}`, 'record'),
-    miniStat((s.xp || 0).toLocaleString('fr-FR'), 'XP'),
+    miniStat(nombre(s.xp), 'XP'),
   ]));
 
   // Répartition

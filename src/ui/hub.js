@@ -10,6 +10,7 @@ import { bindHumanCountdown } from './countdown.js';
 import { navigate } from '../core/router.js';
 import { effectiveStreak, multiplierFor, carriere, XP_BASE } from '../core/xp.js';
 import { ecusson } from './ecusson.js';
+import { nombre } from '../core/format.js';
 
 const STATE_BADGE = {
   win: { icon: '✅', label: 'Réussi' },
@@ -82,14 +83,14 @@ export function renderHub(view) {
     el('div.carriere-card__body', {}, [
       el('div.carriere-card__top', {}, [
         el('span.carriere-card__titre', { text: poste.titre }),
-        el('span.carriere-card__xp', { text: `${poste.xp.toLocaleString('fr-FR')} XP` }),
+        el('span.carriere-card__xp', { text: `${nombre(poste.xp)} XP` }),
       ]),
       el('div.carriere-card__bar', { 'aria-hidden': 'true' }, [
         el('div.carriere-card__fill', { style: { width: `${poste.progression * 100}%` } }),
       ]),
       el('div.carriere-card__next', {
         text: poste.suivant
-          ? `Niveau ${poste.rang}/${poste.total} · encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} »`
+          ? `Niveau ${poste.rang}/${poste.total} · encore ${nombre(poste.manquant)} XP avant « ${poste.suivant} »`
           : `Niveau ${poste.rang}/${poste.total} · sommet atteint, personne au-dessus.`,
       }),
     ]),

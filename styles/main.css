@@ -3,33 +3,44 @@
 
 /* ---------- Polices ----------
    Deux familles, sous licence SIL Open Font License, auto-hébergées : aucun
-   appel à un CDN, le site reste donc jouable hors ligne. Space Grotesk porte
-   la personnalité (titres, lettres des grilles), Inter assure la lisibilité
-   du reste. Fabriquées par tools/fetch_fonts.py. */
+   appel à un CDN, le site reste jouable hors ligne.
+
+   **Fraunces** porte l'affichage — une antique douce, aux terminaisons
+   arrondies et aux formes légèrement débridées en grand. Elle évoque le
+   torréfacteur plutôt que le tableau de bord, et répond aux écussons dessinés
+   au trait épais.
+
+   **Instrument Sans** porte le texte et les lettres des grilles : une
+   néo-grotesque étroite, aux formes sans ambiguïté — ce qu'exige une tuile de
+   jeu de lettres, où une antique serait illisible.
+
+   Instances statiques fabriquées par tools/fetch_fonts.py. */
 @font-face {
-  font-family: "Space Grotesk"; font-weight: 700; font-style: normal; font-display: swap;
-  src: url("../assets/fonts/SpaceGrotesk-Bold.woff2") format("woff2");
+  font-family: "Fraunces"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Fraunces-Bold.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Space Grotesk"; font-weight: 500; font-style: normal; font-display: swap;
-  src: url("../assets/fonts/SpaceGrotesk-Medium.woff2") format("woff2");
+  font-family: "Fraunces"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Fraunces-SemiBold.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Inter"; font-weight: 400; font-style: normal; font-display: swap;
-  src: url("../assets/fonts/Inter-Regular.woff2") format("woff2");
+  font-family: "Instrument Sans"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/InstrumentSans-Regular.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Inter"; font-weight: 600; font-style: normal; font-display: swap;
-  src: url("../assets/fonts/Inter-SemiBold.woff2") format("woff2");
+  font-family: "Instrument Sans"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/InstrumentSans-SemiBold.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Inter"; font-weight: 800; font-style: normal; font-display: swap;
-  src: url("../assets/fonts/Inter-ExtraBold.woff2") format("woff2");
+  font-family: "Instrument Sans"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/InstrumentSans-Bold.woff2") format("woff2");
 }
 
 :root {
-  --font-text: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "Space Grotesk", var(--font-text);
+  --font-text: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  /* Les lettres des grilles : jamais l'antique, toujours la grotesque. */
+  --font-tile: "Instrument Sans", system-ui, -apple-system, sans-serif;
 }
 
 /* ---------- Reset léger ---------- */
@@ -57,7 +68,7 @@ body::before {
 }
 button { font: inherit; color: inherit; cursor: pointer; }
 a { color: var(--primary); }
-h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.2; letter-spacing: -.015em; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.18; letter-spacing: -.005em; }
 
 /* ---------- Thème : clair par défaut ---------- */
 :root {
@@ -201,7 +212,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 
 /* ---------- Hub ---------- */
 .hub__hero { text-align: center; padding: 1.2rem 0 .5rem; }
-.hub__brand { font-family: var(--font-display); font-size: 2rem; letter-spacing: -.03em; }
+.hub__brand { font-family: var(--font-display); font-size: 2.05rem; letter-spacing: -.01em; }
 .hub__brand-logo { width: 56px; height: 56px; vertical-align: -.28em; }
 .topbar__logo { width: 26px; height: 26px; vertical-align: -.35em; }
 .hub__tagline { color: var(--muted); margin-top: .3rem; font-size: .95rem; }
@@ -234,8 +245,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
    restent que l'avancement et la barre, centrés. */
 .tournee-card { text-align: center; }
 .tournee-card__compte {
-  font-family: var(--font-display); font-weight: 700; font-size: 2.1rem;
-  line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+  font-family: var(--font-display); font-weight: 700; font-size: 2.3rem;
+  line-height: 1; letter-spacing: -.01em; font-variant-numeric: tabular-nums;
 }
 .tournee-card__meta { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
 .tournee-card__bar {
@@ -465,7 +476,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: .6rem; margin: .4rem 0 1rem;
 }
-.game-title { font-family: var(--font-display); font-size: 1.55rem; letter-spacing: -.02em; }
+.game-title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: -.008em; }
 .game-sub { color: var(--muted); font-size: .85rem; margin-top: .1rem; }
 .howto-btn { font-weight: 800; }
 
@@ -473,7 +484,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .mot-board { display: grid; gap: 6px; justify-content: center; margin: 0 auto 1.1rem; }
 .mot-row { display: grid; grid-auto-flow: column; gap: 6px; justify-content: center; }
 .tile {
-  font-family: var(--font-display);
+  font-family: var(--font-tile);
   --size: clamp(40px, 13vw, 58px);
   width: var(--size); height: var(--size); position: relative;
   display: grid; place-items: center; border-radius: 10px;
@@ -514,7 +525,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .keyboard { display: grid; gap: 6px; margin: 0 auto; max-width: 500px; }
 .keyboard__row { display: flex; gap: 5px; justify-content: center; }
 .key {
-  font-family: var(--font-display);
+  font-family: var(--font-tile);
   flex: 1; min-width: 0; height: 52px; border-radius: 8px; border: 0;
   background: var(--key-bg); color: var(--key-ink); font-weight: 700; font-size: 1rem;
   display: grid; place-items: center; transition: transform .05s ease, background .1s;
@@ -761,7 +772,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .boite-side--left { left: 0; top: 15%; bottom: 15%; flex-direction: column; justify-content: space-around; }
 .boite-side--right { right: 0; top: 15%; bottom: 15%; flex-direction: column; justify-content: space-around; }
 .boite-letter {
-  font-family: var(--font-display);
+  font-family: var(--font-tile);
   width: calc(var(--box) * .15); height: calc(var(--box) * .15);
   display: grid; place-items: center; border-radius: 50%;
   background: var(--surface); border: 2px solid var(--muted); color: var(--text);
@@ -798,7 +809,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 }
 .gaufre-hole { aspect-ratio: 1 / 1; }
 .gaufre-tile {
-  font-family: var(--font-display);
+  font-family: var(--font-tile);
   position: relative; aspect-ratio: 1 / 1; border-radius: 10px;
   border: 2px solid var(--border); background: var(--surface); color: var(--text);
   font-weight: 800; font-size: clamp(1rem, 5.4vw, 1.5rem); text-transform: uppercase;
@@ -1093,7 +1104,7 @@ body.modal-open { overflow: hidden; }
 .onboarding__media { height: 132px; display: grid; place-items: center; }
 .onboarding__logo { width: 116px; height: 116px; }
 .onboarding__emoji { font-size: 4.6rem; line-height: 1; }
-.onboarding__title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: -.02em; }
+.onboarding__title { font-family: var(--font-display); font-size: 1.65rem; letter-spacing: -.008em; }
 .onboarding__text { color: var(--muted); font-size: 1rem; max-width: 34ch; }
 .onboarding__note {
   color: var(--muted); font-size: .85rem; max-width: 36ch;
