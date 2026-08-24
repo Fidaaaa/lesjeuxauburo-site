@@ -1,5 +1,18 @@
 // Mini-utilitaires DOM, pour éviter la verbosité sans framework.
 
+// Applique un objet de styles. `Object.assign(node.style, …)` avale
+// silencieusement les propriétés personnalisées : `style['--x'] = 'rouge'` ne
+// fait rien du tout, sans la moindre erreur. Il faut passer par setProperty,
+// d'où ce détour — c'est ce qui empêchait la couleur propre à chaque jeu
+// d'apparaître sur les cartes du hub.
+function setStyle(node, styles) {
+  for (const [prop, value] of Object.entries(styles)) {
+    if (value == null) continue;
+    if (prop.startsWith('--')) node.style.setProperty(prop, String(value));
+    else node.style[prop] = value;
+  }
+}
+
 // Crée un élément : el('div.classe#id', { attrs }, [enfants|texte]).
 export function el(selector, attrs = {}, children = []) {
   const parts = selector.split(/(?=[.#])/);
@@ -14,7 +27,7 @@ export function el(selector, attrs = {}, children = []) {
     if (k === 'class') node.className += (node.className ? ' ' : '') + v;
     else if (k === 'text') node.textContent = v;
     else if (k === 'html') node.innerHTML = v;
-    else if (k === 'style' && typeof v === 'object') Object.assign(node.style, v);
+    else if (k === 'style' && typeof v === 'object') setStyle(node, v);
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
     else if (k === 'dataset' && typeof v === 'object') Object.assign(node.dataset, v);
     else node.setAttribute(k, v === true ? '' : v);

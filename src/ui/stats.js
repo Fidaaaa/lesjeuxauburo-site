@@ -203,7 +203,14 @@ function gameStatCard(g) {
     }
     card.append(chart);
   } else {
-    card.append(el('p.stats-card__empty', { text: 'Pas encore de partie. Lance-toi !' }));
+    // Le message dépend du nombre de parties, pas de la répartition : afficher
+    // « pas encore de partie » sous un compteur qui affiche 5 jouées était un
+    // démenti pur et simple.
+    card.append(el('p.stats-card__empty', {
+      text: s.played
+        ? 'Pas encore de quoi tracer une courbe — reviens demain.'
+        : 'Pas encore de partie. Lance-toi !',
+    }));
   }
   return card;
 }

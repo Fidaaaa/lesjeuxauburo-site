@@ -91,6 +91,19 @@ export function formatCountdown(totalSeconds) {
   return `${h}:${m}:${sec}`;
 }
 
+// Même attente, dite comme on la dirait à voix haute : « dans 4 h », « dans
+// 23 minutes ». Les secondes qui défilent transforment une pause en échéance,
+// alors on ne les montre que dans la dernière minute, où elles amusent.
+export function humanCountdown(totalSeconds) {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h >= 2) return `dans ${h} h`;
+  if (h === 1) return m ? `dans 1 h ${m}` : 'dans 1 h';
+  if (m >= 1) return `dans ${m} minute${m > 1 ? 's' : ''}`;
+  return `dans ${s} seconde${s > 1 ? 's' : ''}`;
+}
+
 // Date lisible en français : « jeudi 21 août 2026 ».
 export function humanDate(dateStr = getPuzzleDate()) {
   const [y, m, d] = dateStr.split('-').map(Number);

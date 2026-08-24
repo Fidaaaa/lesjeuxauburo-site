@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="lesjeuxauburo">
+  <title>lesjeuxauburo</title>
+  <!--
+    La marque, redessinée en vectoriel à partir de assets/logo.png, pour une
+    seule raison : la vapeur devait pouvoir monter. Dans un PNG elle est figée.
+
+    L'animation vit dans la feuille interne ci-dessous plutôt que dans
+    main.css : le fichier est chargé en <img>, il ne voit donc pas les styles
+    de la page. Elle s'arrête d'elle-même si le système demande moins de
+    mouvement.
+  -->
+  <style>
+    .vapeur {
+      fill: none;
+      stroke: #bb6d3a;
+      stroke-width: 17;
+      stroke-linecap: round;
+      transform-origin: 256px 150px;
+      animation: monte 4.6s ease-in-out infinite;
+    }
+    .vapeur--2 { animation-delay: -1.5s; }
+    .vapeur--3 { animation-delay: -3.1s; }
+
+    /* Une volute s'étire en montant, dérive, puis s'estompe. L'opacité ne
+       redescend jamais à zéro : c'est d'abord un logo, il doit rester lisible
+       à chaque instant, y compris sur une capture d'écran. */
+    @keyframes monte {
+      0%   { opacity: .45; transform: translateY(12px) scaleY(.88); }
+      30%  { opacity: 1;   transform: translateY(2px)  scaleY(1) translateX(2px); }
+      65%  { opacity: .85; transform: translateY(-5px) scaleY(1.07) translateX(4px); }
+      100% { opacity: .45; transform: translateY(12px) scaleY(.88); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vapeur { animation: none; opacity: 1; }
+    }
+  </style>
+
+  <!-- Cadre et fond crème -->
+  <rect x="21" y="21" width="470" height="470" rx="112"
+        fill="#ded9cd" stroke="#40474d" stroke-width="27"/>
+
+  <!-- Vapeur : trois volutes, décalées dans le temps -->
+  <g>
+    <path class="vapeur vapeur--1" d="M215 179 C199 154 232 141 217 117 C203 97 228 85 221 66"/>
+    <path class="vapeur vapeur--2" d="M252 189 C234 160 269 145 251 119 C235 97 262 83 255 60"/>
+    <path class="vapeur vapeur--3" d="M288 179 C272 154 303 141 289 117 C275 97 301 87 293 69"/>
+  </g>
+
+  <!-- Anse, dessinée avant la tasse pour passer derrière son bord -->
+  <path d="M372 240 C438 231 464 264 458 293 C452 325 420 344 374 337"
+        fill="none" stroke="#40474d" stroke-width="26" stroke-linecap="round"/>
+
+  <!-- Tasse -->
+  <path d="M120 212 H380 V330 Q380 404 300 404 H200 Q120 404 120 330 Z"
+        fill="#658e97" stroke="#40474d" stroke-width="26"
+        stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -14,9 +14,15 @@ export function gameDayState(gameId, dateStr) {
       label: result.scoreLabel || null,
     };
   }
+  // Une partie entamée. On se contente de l'existence de l'état sauvegardé :
+  // aucun jeu n'enregistre au montage, tous attendent un geste du joueur, donc
+  // un état présent veut dire « commencé ».
+  //
+  // L'ancienne version exigeait un tableau `guesses`, que seuls Le Mot,
+  // Chaud-Froid et Le Pays possèdent : les sept autres jeux restaient affichés
+  // « À jouer » même à trois cases de la fin.
   const inProgress = loadGameState(gameId, dateStr);
-  if (inProgress && Array.isArray(inProgress.guesses) && inProgress.guesses.length > 0
-      && inProgress.status === 'playing') {
+  if (inProgress && inProgress.status === 'playing') {
     return { status: 'progress', points: 0, label: null };
   }
   if (inProgress && inProgress.status && inProgress.status !== 'playing') {

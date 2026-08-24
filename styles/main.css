@@ -80,6 +80,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   --key-ink: #222834;
 
   --shadow: 0 1px 2px rgba(40, 55, 75, .09), 0 4px 16px rgba(40, 55, 75, .07);
+  /* Ombre au survol : la carte se soulève un peu plus franchement. */
+  --shadow-lift: 0 3px 6px rgba(40, 55, 75, .10), 0 12px 28px rgba(40, 55, 75, .10);
   --radius: 14px;
   --radius-sm: 9px;
   --maxw: 560px;
@@ -107,6 +109,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
     --key-ink: #e7ecf3;
 
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
+    --shadow-lift: 0 3px 8px rgba(0, 0, 0, .5), 0 16px 34px rgba(0, 0, 0, .45);
     --doodle-opacity: .085;
   }
 }
@@ -128,6 +131,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   --key-bg: #2c3541;
   --key-ink: #e7ecf3;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
+  --shadow-lift: 0 3px 8px rgba(0, 0, 0, .5), 0 16px 34px rgba(0, 0, 0, .45);
   --doodle-opacity: .085;
 }
 
@@ -202,10 +206,11 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .topbar__logo { width: 26px; height: 26px; vertical-align: -.35em; }
 .hub__tagline { color: var(--muted); margin-top: .3rem; font-size: .95rem; }
 .hub__date { margin-top: .7rem; font-weight: 700; font-size: .9rem; }
-.hub__countdown {
-  margin-top: .25rem; color: var(--muted); font-size: .85rem;
-  font-variant-numeric: tabular-nums;
-}
+/* Le compte à rebours est une note de bas de page, pas une échéance : discret,
+   sans chiffres qui défilent, sans couleur d'alerte. */
+.hub__countdown { margin-top: .2rem; color: var(--muted); font-size: .8rem; opacity: .85; }
+.hub__countdown .countdown__value { color: inherit; font-weight: 600; }
+/* Le chrono précis, lui, subsiste en fin de partie, où l'attente est le sujet. */
 .countdown__value { color: var(--coffee); font-variant-numeric: tabular-nums; font-weight: 800; }
 
 .hub__section { font-size: 1.05rem; margin: 1.3rem .2rem .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .78rem; }
@@ -213,17 +218,26 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .tournee-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 1rem; margin-top: 1rem;
+  animation: pose .45s cubic-bezier(.2, .75, .3, 1) both;
 }
 .tournee-card__grade { display: flex; align-items: center; gap: .8rem; }
 .tournee-card__emoji { font-size: 2rem; }
 .tournee-card__label { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
-.tournee-card__meta { color: var(--muted); font-size: .85rem; }
+.tournee-card__meta { color: var(--muted); font-size: .85rem; margin-top: .1rem; }
 .tournee-card__bar {
   height: 8px; background: var(--surface-2); border-radius: 99px; margin: .8rem 0 0; overflow: hidden;
 }
+/* Journée vierge : un pointillé qui attend, plutôt qu'une gouttière vide.
+   Une barre à zéro annonce un retard ; un pointillé annonce une place à
+   prendre. */
+.tournee-card__bar[data-empty="1"] {
+  background: transparent;
+  border: 2px dashed var(--border);
+  height: 10px;
+}
 .tournee-card__fill {
   height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary));
-  border-radius: 99px; transition: width .4s ease;
+  border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .3, 1);
 }
 
 .hub__grid { display: grid; grid-template-columns: 1fr; gap: .7rem; }
@@ -234,15 +248,31 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   background: var(--surface); border: 1px solid var(--border);
   border-left: 5px solid var(--game-color, var(--primary));
   border-radius: var(--radius); padding: .85rem; box-shadow: var(--shadow);
-  transition: transform .1s ease, box-shadow .15s ease;
+  transition: transform .14s cubic-bezier(.2, .8, .3, 1), box-shadow .18s ease;
+  /* Les cartes se posent l'une après l'autre : la page s'installe au lieu
+     d'apparaître d'un bloc. Cadencé serré, pour rester sous la seconde. */
+  animation: pose .42s cubic-bezier(.2, .75, .3, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
-.gamecard:hover { transform: translateY(-2px); }
-/* Vignette du jeu : l'illustration générée, la même que dans l'app iOS */
+.gamecard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.gamecard:active { transform: translateY(-1px) scale(.995); }
+
+@keyframes pose {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Vignette du jeu : l'illustration générée, la même que dans l'app iOS.
+   Très légèrement inclinée, en alternance, pour rompre l'alignement au
+   cordeau — l'inclinaison se redresse au survol. */
 .gamecard__art {
   width: 52px; height: 52px; flex: none; border-radius: 13px;
   display: grid; place-items: center; overflow: hidden;
   background: color-mix(in srgb, var(--game-color, var(--primary)) 16%, var(--surface));
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform .22s cubic-bezier(.2, .8, .3, 1);
 }
+.gamecard:hover .gamecard__art { transform: rotate(0deg) scale(1.06); }
 .gamecard__art img { width: 84%; height: 84%; object-fit: contain; display: block; }
 .gamecard__emoji { font-size: 1.6rem; line-height: 1; }
 .gamecard__body { flex: 1; min-width: 0; }
@@ -255,6 +285,40 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .gamecard__badge { font-size: 1.3rem; }
 .gamecard__badge-label { font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; line-height: 1.1; }
 
+/* Le tampon des parties finies. Encre un peu baveuse, cadre irrégulier, pose
+   de travers : ce qu'on obtient en appuyant un tampon à la main. */
+.gamecard__stamp {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: .78rem; text-transform: uppercase; letter-spacing: .12em;
+  padding: .18rem .42rem .14rem;
+  border: 2px solid currentColor;
+  /* Coins volontairement inégaux : un cadre parfait trahirait l'impression. */
+  border-radius: 7px 5px 8px 4px;
+  transform: rotate(-11deg);
+  opacity: .82;
+  white-space: nowrap;
+}
+.gamecard__stamp[data-tone="win"] { color: var(--accent); }
+.gamecard__stamp[data-tone="lose"] { color: var(--mot-absent); }
+
+/* Une carte tamponnée passe au second plan : le dossier est traité, l'œil
+   doit filer vers ce qu'il reste à faire. */
+.gamecard[data-state="win"], .gamecard[data-state="lose"] { box-shadow: none; }
+.gamecard[data-state="win"] .gamecard__art,
+.gamecard[data-state="lose"] .gamecard__art { filter: saturate(.55); opacity: .75; }
+.gamecard[data-state="lose"] { opacity: .86; }
+
+/* Celle qui est en cours, à l'inverse, respire. */
+.gamecard[data-state="progress"] { border-left-width: 7px; }
+.gamecard[data-state="progress"] .gamecard__badge {
+  animation: sablier 2.6s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes sablier {
+  0%, 70%, 100% { transform: rotate(0deg); }
+  80%           { transform: rotate(180deg); }
+}
+
 .gamecard--soon { opacity: .72; cursor: default; }
 .gamecard--soon .gamecard__art { filter: grayscale(.5); opacity: .8; }
 .gamecard__soon {
@@ -262,8 +326,23 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   background: var(--surface-2); color: var(--muted); padding: .25rem .5rem; border-radius: 99px; flex: none;
 }
 
-.hub__footer { text-align: center; margin-top: 1.6rem; }
-.hub__stats-link { font-weight: 700; text-decoration: none; font-size: .9rem; }
+/* Les deux liens étaient collés l'un à l'autre, faute de séparation entre les
+   deux ancres. En colonne sur mobile, côte à côte dès qu'il y a la place. */
+.hub__footer {
+  text-align: center; margin-top: 1.6rem;
+  display: flex; flex-direction: column; align-items: center; gap: .55rem;
+}
+.hub__stats-link {
+  font-weight: 700; text-decoration: none; font-size: .9rem;
+  padding: .45rem .9rem; border-radius: 99px;
+  background: var(--surface); border: 1px solid var(--border);
+  transition: transform .14s ease, box-shadow .18s ease;
+}
+.hub__stats-link:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+@media (min-width: 420px) {
+  .hub__footer { flex-direction: row; justify-content: center; gap: .6rem; flex-wrap: wrap; }
+  .hub__links { flex-basis: 100%; }
+}
 .hub__links { margin-top: .9rem; font-size: .8rem; color: var(--muted); }
 .hub__links a { color: var(--muted); text-decoration: underline; }
 
@@ -897,7 +976,16 @@ body.modal-open { overflow: hidden; }
 
 /* ---------- Réduction de mouvement ---------- */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  /* Le délai compte autant que la durée : une cascade dont on n'annule que la
+     durée laisse les cartes invisibles le temps de leur retard, puis les fait
+     surgir d'un coup — soit exactement ce qu'on cherchait à éviter. */
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    transition-delay: 0s !important;
+  }
 }
 
 /* ---------- Sauvegarde de la progression (sans compte) ---------- */

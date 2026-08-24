@@ -11,7 +11,7 @@
 
 // À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
 // sans cela, les visiteurs de retour garderaient l'ancienne version.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors
@@ -26,6 +26,7 @@ const SHELL = [
   './styles/main.css',
   './src/main.js',
   './assets/office-pattern.svg',
+  './assets/logo.svg',
   './assets/fonts/SpaceGrotesk-Bold.woff2',
   './assets/fonts/SpaceGrotesk-Medium.woff2',
   './assets/fonts/Inter-Regular.woff2',
