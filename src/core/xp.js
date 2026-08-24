@@ -8,15 +8,22 @@
 //   * le **multiplicateur** découle de la série qu'on a *en arrivant*. Trois
 //     jours en poche et le jeu rapporte double aujourd'hui, avant même d'y
 //     avoir touché — c'est ce qui donne envie d'y aller ;
-//   * l'**XP** accumulée dessine une carrière, du stage non rémunéré à la
-//     direction générale.
+//   * l'**XP** accumulée dessine une carrière en trente niveaux, du stage à la
+//     propriété de la machine à café.
 //
 // Le même barème vaut côté serveur (voir supabase/schema.sql) : il recalcule
 // la série depuis ses propres lignes plutôt que de croire le client, mais les
 // seuils et le socle sont identiques, pour que les deux affichent la même
 // chose.
+//
+// La grille des niveaux, elle, n'est pas écrite ici : elle vient de
+// `levels.js`, engendré par `tools/niveaux.py`, seule source de vérité pour
+// les quatre plateformes.
 
 import { addDays } from './date.js';
+import { NIVEAUX } from './levels.js';
+
+export { NIVEAUX };
 
 /** XP d'un jeu réussi, avant multiplicateur. */
 export const XP_BASE = 10;
@@ -64,26 +71,17 @@ export function effectiveStreak(stats, dateStr) {
 
 // ------------------------------------------------------------------ carrière
 
-// L'échelle interne, du premier jour de stage à la direction. Les seuils sont
-// cumulatifs et valent pour l'XP de toute la vie du joueur, tous jeux
-// confondus — à ne pas confondre avec le grade du jour (core/tournee.js), qui
-// ne juge que la tournée en cours.
-export const NIVEAUX = [
-  { seuil: 0, titre: 'Stagiaire non rémunéré', emoji: '📎' },
-  { seuil: 300, titre: 'Stagiaire', emoji: '🖇️' },
-  { seuil: 900, titre: 'Alternant', emoji: '📔' },
-  { seuil: 2000, titre: 'CDD', emoji: '📄' },
-  { seuil: 4000, titre: 'CDI', emoji: '🗂️' },
-  { seuil: 7000, titre: 'Responsable de service', emoji: '📋' },
-  { seuil: 11000, titre: 'Cadre', emoji: '💼' },
-  { seuil: 17000, titre: 'Cadre supérieur', emoji: '🕴️' },
-  { seuil: 26000, titre: 'Directeur', emoji: '🏢' },
-  { seuil: 40000, titre: 'PDG', emoji: '👑' },
-];
+/** Le niveau correspondant à un rang, avec repli sur le plus haut connu. */
+export function niveauParRang(rang) {
+  return NIVEAUX.find((n) => n.rang === rang) || NIVEAUX[NIVEAUX.length - 1];
+}
 
 /**
  * Où en est la carrière, pour une XP totale donnée : le poste occupé, le
  * suivant, et la progression vers lui.
+ *
+ * L'XP est cumulative et tous jeux confondus — à ne pas confondre avec le
+ * grade du jour (core/tournee.js), qui ne juge que la tournée en cours.
  */
 export function carriere(xpTotal) {
   const xp = Math.max(0, Math.floor(xpTotal || 0));
@@ -97,10 +95,10 @@ export function carriere(xpTotal) {
 
   return {
     xp,
-    niveau: index + 1,
+    rang: actuel.rang,
     total: NIVEAUX.length,
     titre: actuel.titre,
-    emoji: actuel.emoji,
+    ecusson: actuel.ecusson,
     suivant: suivant ? suivant.titre : null,
     manquant: suivant ? suivant.seuil - xp : 0,
     progression: suivant ? Math.min(1, parcouru / palier) : 1,

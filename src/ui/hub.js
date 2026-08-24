@@ -9,6 +9,7 @@ import { el, clear } from '../core/dom.js';
 import { bindHumanCountdown } from './countdown.js';
 import { navigate } from '../core/router.js';
 import { effectiveStreak, multiplierFor, carriere, XP_BASE } from '../core/xp.js';
+import { ecusson } from './ecusson.js';
 
 const STATE_BADGE = {
   win: { icon: '✅', label: 'Réussi' },
@@ -27,11 +28,9 @@ const STAMP = {
 /** Où en est la tournée, dit comme un collègue le dirait. */
 function tourneeMeta(summary) {
   if (summary.done === 0) return 'Rien de commencé — le premier café est toujours le meilleur.';
-  if (summary.done === summary.total) {
-    return `Tournée complète, ${summary.avg} pts de moyenne. Tu peux ranger la tasse.`;
-  }
+  if (summary.done === summary.total) return 'Tournée complète. Tu peux ranger la tasse.';
   const reste = summary.total - summary.done;
-  return `${summary.done} sur ${summary.total} · ${summary.avg} pts de moyenne · ${reste} à faire`;
+  return `Encore ${reste} jeu${reste > 1 ? 'x' : ''} avant la fin de la tournée`;
 }
 
 export function renderHub(view) {
@@ -55,15 +54,13 @@ export function renderHub(view) {
   ]);
 
   // --- Carte tournée ---
+  // Le grade du jour a disparu : il faisait doublon avec le niveau de
+  // carrière, qui dit la même chose en mieux et sans redescendre. Ne restent
+  // que l'avancement chiffré et la barre.
   const summary = tourneeSummary(dateStr);
   const tourneeCard = el('section.tournee-card', { 'aria-label': 'Ma tournée du jour' }, [
-    el('div.tournee-card__grade', {}, [
-      el('span.tournee-card__emoji', { 'aria-hidden': 'true', text: summary.grade.emoji }),
-      el('div', {}, [
-        el('div.tournee-card__label', { text: summary.grade.label }),
-        el('div.tournee-card__meta', { text: tourneeMeta(summary) }),
-      ]),
-    ]),
+    el('div.tournee-card__compte', { text: `${summary.done}/${summary.total}` }),
+    el('div.tournee-card__meta', { text: tourneeMeta(summary) }),
     el('div.tournee-card__bar', {
       'aria-hidden': 'true', 'data-empty': summary.done === 0 ? '1' : '0',
     }, [
@@ -78,9 +75,10 @@ export function renderHub(view) {
   const xpTotal = GAMES.reduce((total, g) => total + (loadStats(g.id).xp || 0), 0);
   const poste = carriere(xpTotal);
   const carriereCard = el('a.carriere-card', {
-    href: '#/stats', 'aria-label': `Carrière : ${poste.titre}, ${poste.xp} XP`,
+    href: '#/stats',
+    'aria-label': `Carrière : ${poste.titre}, niveau ${poste.rang} sur ${poste.total}, ${poste.xp} XP`,
   }, [
-    el('span.carriere-card__emoji', { 'aria-hidden': 'true', text: poste.emoji }),
+    ecusson(poste, 46),
     el('div.carriere-card__body', {}, [
       el('div.carriere-card__top', {}, [
         el('span.carriere-card__titre', { text: poste.titre }),
@@ -91,8 +89,8 @@ export function renderHub(view) {
       ]),
       el('div.carriere-card__next', {
         text: poste.suivant
-          ? `Encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} »`
-          : 'Sommet de la hiérarchie atteint. Personne au-dessus.',
+          ? `Niveau ${poste.rang}/${poste.total} · encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} »`
+          : `Niveau ${poste.rang}/${poste.total} · sommet atteint, personne au-dessus.`,
       }),
     ]),
   ]);

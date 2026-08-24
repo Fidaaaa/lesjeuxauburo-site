@@ -213,17 +213,31 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 /* Le chrono précis, lui, subsiste en fin de partie, où l'attente est le sujet. */
 .countdown__value { color: var(--coffee); font-variant-numeric: tabular-nums; font-weight: 800; }
 
-.hub__section { font-size: 1.05rem; margin: 1.3rem .2rem .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .78rem; }
+.hub__section {
+  display: flex; align-items: center; gap: .7rem;
+  margin: 1.5rem .1rem .7rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; font-weight: 700;
+}
+/* Un filet qui prolonge le titre jusqu'au bord : sépare sans ajouter de trait
+   horizontal de plus. */
+.hub__section::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
 
 .tournee-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 1rem; margin-top: 1rem;
+  box-shadow: var(--shadow); padding: 1.15rem 1rem 1.1rem; margin-top: 1rem;
   animation: pose .45s cubic-bezier(.2, .75, .3, 1) both;
 }
-.tournee-card__grade { display: flex; align-items: center; gap: .8rem; }
-.tournee-card__emoji { font-size: 2rem; }
-.tournee-card__label { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
-.tournee-card__meta { color: var(--muted); font-size: .85rem; margin-top: .1rem; }
+/* Le grade du jour a disparu — il doublonnait avec le niveau de carrière. Ne
+   restent que l'avancement et la barre, centrés. */
+.tournee-card { text-align: center; }
+.tournee-card__compte {
+  font-family: var(--font-display); font-weight: 700; font-size: 2.1rem;
+  line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+}
+.tournee-card__meta { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
 .tournee-card__bar {
   height: 8px; background: var(--surface-2); border-radius: 99px; margin: .8rem 0 0; overflow: hidden;
 }
@@ -241,19 +255,31 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 }
 
 /* ---------- Carrière ----------
-   La progression de fond, par opposition au grade du jour juste au-dessus :
-   elle ne redescend jamais, et cliquer mène au détail dans les statistiques. */
+   La progression de fond, par opposition à l'avancement du jour juste
+   au-dessus : elle ne redescend jamais, et cliquer mène au détail dans les
+   statistiques. C'est la pièce maîtresse du hub, d'où le halo café derrière
+   l'écusson et le liseré du haut — les seuls du site. */
 .carriere-card {
-  display: flex; align-items: center; gap: .8rem;
-  margin-top: .7rem; padding: .8rem 1rem;
-  background: var(--surface); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: .85rem;
+  margin-top: .7rem; padding: .85rem 1rem;
+  background:
+    radial-gradient(120px 90px at 8% 50%,
+                    color-mix(in srgb, var(--coffee) 9%, transparent), transparent 70%),
+    var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
   color: inherit; text-decoration: none;
   animation: pose .48s cubic-bezier(.2, .75, .3, 1) both;
   transition: transform .14s cubic-bezier(.2, .8, .3, 1), box-shadow .18s ease;
 }
+.carriere-card::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+  background: linear-gradient(90deg, var(--coffee), transparent 65%);
+  opacity: .55;
+}
 .carriere-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-.carriere-card__emoji { font-size: 1.7rem; flex: none; }
+/* L'écusson remplace l'emoji : c'est le même visuel que dans le classement. */
 .carriere-card__body { flex: 1; min-width: 0; }
 .carriere-card__top {
   display: flex; align-items: baseline; justify-content: space-between; gap: .6rem;
@@ -962,15 +988,59 @@ body.modal-open { overflow: hidden; }
   border: 2px solid var(--border); background: var(--surface); color: var(--text); margin-bottom: .7rem;
 }
 
-.board__ranking { list-style: none; display: grid; gap: .35rem; padding: 0; }
+.board__ranking { list-style: none; display: grid; gap: .4rem; padding: 0; }
 .board__row {
   display: flex; align-items: center; gap: .7rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: .55rem .8rem;
+  border-radius: var(--radius); padding: .5rem .75rem;
+  box-shadow: var(--shadow);
 }
-.board__rank { width: 2ch; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 700; }
-.board__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-.board__score { font-weight: 800; font-variant-numeric: tabular-nums; }
+/* Sa propre ligne, repérable d'un coup d'œil dans une longue liste. */
+.board__row[data-moi="1"] {
+  border-color: color-mix(in srgb, var(--coffee) 45%, var(--border));
+  background: color-mix(in srgb, var(--coffee) 7%, var(--surface));
+}
+.board__rank {
+  width: 2.2ch; text-align: right; flex: none;
+  color: var(--muted); font-variant-numeric: tabular-nums;
+  font-family: var(--font-display); font-weight: 700; font-size: .95rem;
+}
+/* Le podium se distingue sans médailles ni couleurs criardes. */
+.board__row:nth-child(1) .board__rank { color: var(--coffee); font-size: 1.1rem; }
+.board__row:nth-child(2) .board__rank,
+.board__row:nth-child(3) .board__rank { color: var(--text); }
+
+.board__who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+/* Le titre passe avant le pseudo : c'est lui qui se compare. */
+.board__titre {
+  font-family: var(--font-display); font-weight: 700; font-size: .92rem;
+  color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board__name {
+  font-size: .8rem; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board__score {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+  font-variant-numeric: tabular-nums; color: var(--coffee); flex: none;
+}
+
+/* ---------- Écussons de niveau ----------
+   Produits par tools/gen_niveaux.py, affichés de 28 à 56 px. Le disque en
+   fond leur donne une assise commune malgré leurs silhouettes différentes. */
+.ecusson {
+  width: var(--ecusson-taille, 40px); height: var(--ecusson-taille, 40px);
+  flex: none; display: grid; place-items: center; border-radius: 50%;
+  background: color-mix(in srgb, var(--coffee) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--coffee) 22%, var(--border));
+  overflow: hidden;
+}
+.ecusson img { width: 82%; height: 82%; object-fit: contain; display: block; }
+.ecusson__repli {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: calc(var(--ecusson-taille, 40px) * .42);
+  color: var(--coffee); line-height: 1;
+}
 
 .board__group {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);

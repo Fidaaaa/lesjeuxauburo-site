@@ -18,6 +18,8 @@ import { showModal, closeModal } from './modal.js';
 import { authChoices, upgradePanel } from './authbuttons.js';
 import { navigate } from '../core/router.js';
 import { copyText } from '../core/share.js';
+import { niveauParRang } from '../core/xp.js';
+import { ecusson } from './ecusson.js';
 
 const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
   'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -393,14 +395,30 @@ export async function renderGroupInvite(view, rawCode) {
 
 // --- Briques communes -------------------------------------------------------
 
-function rankingTable(rows, emptyText) {
+/**
+ * Une ligne de classement : la place, l'écusson du niveau, le titre au-dessus
+ * du pseudo, et l'XP du mois seule à droite.
+ *
+ * Le titre passe avant le pseudo parce que c'est lui qui se compare : deux
+ * pseudos ne disent rien l'un de l'autre, deux niveaux si.
+ */
+function rankingTable(rows, emptyText, moi = null) {
   if (!rows?.length) return el('p.board__note', { text: emptyText });
   const table = el('ol.board__ranking');
   for (const row of rows) {
-    table.append(el('li.board__row', {}, [
+    // Le serveur envoie un numéro ; les titres et les écussons vivent ici, ce
+    // qui permet d'élargir la grille sans migration. Un rang inconnu d'un
+    // client ancien retombe sur le plus haut niveau qu'il connaisse.
+    const niveau = niveauParRang(row.niveau || 1);
+    const estMoi = moi && row.pseudo === moi;
+    table.append(el('li.board__row', { 'data-moi': estMoi ? '1' : '0' }, [
       el('span.board__rank', { text: `${row.rang}` }),
-      el('span.board__name', { text: row.pseudo }),
-      el('span.board__score', { text: `${row.points} XP` }),
+      ecusson(niveau, 34),
+      el('span.board__who', {}, [
+        el('span.board__titre', { text: niveau.titre }),
+        el('span.board__name', { text: row.pseudo }),
+      ]),
+      el('span.board__score', { text: `${row.points}` }),
     ]));
   }
   return table;

@@ -10,6 +10,7 @@ import { exportBackup, importBackup, progressAtRisk } from '../core/persistence.
 import { copyText } from '../core/share.js';
 import { carriere, effectiveStreak, multiplierFor, XP_BASE } from '../core/xp.js';
 import { getPuzzleDate } from '../core/date.js';
+import { ecusson } from './ecusson.js';
 
 // Ordre d'affichage des clés de répartition, par jeu.
 const DIST_ORDER = {
@@ -57,11 +58,11 @@ export function renderStats(view) {
   const poste = carriere(xpTotal);
   wrap.append(el('section.carriere-detail', {}, [
     el('div.carriere-detail__head', {}, [
-      el('span.carriere-detail__emoji', { 'aria-hidden': 'true', text: poste.emoji }),
+      ecusson(poste, 58),
       el('div', {}, [
         el('div.carriere-detail__titre', { text: poste.titre }),
         el('div.carriere-detail__rang', {
-          text: `Niveau ${poste.niveau} sur ${poste.total} · ${poste.xp.toLocaleString('fr-FR')} XP`,
+          text: `Niveau ${poste.rang} sur ${poste.total} · ${poste.xp.toLocaleString('fr-FR')} XP`,
         }),
       ]),
     ]),
