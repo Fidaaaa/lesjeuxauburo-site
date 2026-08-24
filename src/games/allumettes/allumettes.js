@@ -397,6 +397,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? 'Équation rétablie !' : 'Pas résolu',
         message, revealNode: reveal, shareText: buildShareText(won),

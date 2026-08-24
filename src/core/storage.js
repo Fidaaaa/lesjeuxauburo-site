@@ -3,6 +3,7 @@
 // (mode navigation privée, quota plein, etc.).
 
 import { STORAGE_PREFIX } from './config.js';
+import { xpFor } from './xp.js';
 
 function key(...parts) {
   return [STORAGE_PREFIX, ...parts].join(':');
@@ -71,6 +72,7 @@ const EMPTY_STATS = {
   lastPlayedDate: null, // date de puzzle du dernier résultat enregistré
   lastWonDate: null,
   dist: {}, // répartition des scores (ex: nb d'essais -> compte)
+  xp: 0, // XP cumulée sur ce jeu, multiplicateurs de série compris
 };
 
 export function loadStats(gameId) {
@@ -91,10 +93,17 @@ export function recordStats(gameId, { dateStr, won, distKey, prevDateStr }) {
   stats.played += 1;
   if (won) stats.wins += 1;
 
-  // Streak : on continue si le dernier jour gagné est la veille (prevDateStr).
+  // Série : elle se poursuit si le dernier jour gagné est la veille. Un échec
+  // comme un abandon la remettent à zéro — l'abandon passe par ici avec
+  // `won: false`.
+  //
+  // L'XP est calculée sur la série d'*avant* la partie : arriver avec trois
+  // jours en poche vaut double aujourd'hui. C'est la règle annoncée sur la
+  // carte du jeu avant d'y toucher, et la même que celle du serveur.
   if (won) {
-    if (stats.lastWonDate === prevDateStr) stats.currentStreak += 1;
-    else stats.currentStreak = 1;
+    const serieAvant = stats.lastWonDate === prevDateStr ? stats.currentStreak : 0;
+    stats.xp = (stats.xp || 0) + xpFor(serieAvant);
+    stats.currentStreak = serieAvant + 1;
     stats.lastWonDate = dateStr;
     if (stats.currentStreak > stats.maxStreak) stats.maxStreak = stats.currentStreak;
   } else {

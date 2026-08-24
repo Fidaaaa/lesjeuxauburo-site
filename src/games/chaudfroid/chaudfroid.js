@@ -280,6 +280,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? `Trouvé en ${state.guesses.length} essai(s)` : 'Abandon',
         message, revealNode: reveal, shareText: buildShareText(),

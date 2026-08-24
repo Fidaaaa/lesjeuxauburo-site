@@ -33,7 +33,7 @@ export function renderLeaderboard(view) {
   wrap.append(el('div.stats__head', {}, [
     el('a.stats__back', { href: '#/', text: '← Retour au hub' }),
     el('h1.stats__title', { text: '🏆 Classement' }),
-    el('p.board__month', { text: `Points du mois de ${monthLabel()} · remise à zéro le 1er` }),
+    el('p.board__month', { text: `XP gagnée en ${monthLabel()} · remise à zéro le 1er` }),
   ]));
   view.append(wrap);
 
@@ -49,9 +49,12 @@ export function renderLeaderboard(view) {
 function renderSignedOut(body) {
   clear(body);
   body.append(el('div.board__intro', {}, [
-    el('p', { text: 'Le classement compte 1 point par jeu réussi, tous joueurs confondus, '
-      + 'et repart de zéro chaque mois. Il mesure la régularité plus que la performance : '
-      + 'dix points par jour au maximum, soit une tournée complète.' }),
+    el('p', { text: 'Le classement compte l’XP gagnée ce mois-ci, tous joueurs confondus, '
+      + 'et repart de zéro chaque mois. Chaque jeu réussi rapporte 10 XP, le double à '
+      + 'partir de 3 jours d’affilée sur ce jeu, le quadruple à partir de 25. '
+      + 'Il récompense donc la régularité plus que la performance.' }),
+    el('p.board__note', { text: 'Les séries sont recalculées par le serveur à partir de '
+      + 'tes parties enregistrées : personne ne peut s’attribuer un multiplicateur.' }),
     el('p.board__note', { text: 'Se connecter ne sert qu’à ça. Le jeu reste entièrement '
       + 'jouable sans compte, et ta progression locale n’est pas touchée.' }),
   ]));
@@ -85,7 +88,7 @@ async function renderSignedIn(body) {
   if (isAnonymous()) {
     body.append(el('div.board__warn', {}, [
       el('p', { text: 'Compte sans identification : il n’existe que dans ce navigateur. '
-        + 'Si tu y tiens, note ton pseudo — c’est tout ce qui te relie à tes points.' }),
+        + 'Si tu y tiens, note ton pseudo — c’est tout ce qui te relie à ton XP.' }),
       upgradePanel({ onSignedIn: () => renderSignedIn(body) }),
     ]));
   }
@@ -121,7 +124,7 @@ async function refreshMyPoints(node) {
     await flush();
     const points = await myMonthlyPoints();
     const waiting = pendingCount();
-    node.textContent = `${points} pt${points > 1 ? 's' : ''}`
+    node.textContent = `${points} XP`
       + (waiting ? ` (+${waiting} en attente)` : '');
   } catch (_) {
     node.textContent = '—';
@@ -181,7 +184,7 @@ async function renderByGame(panel) {
     try {
       const rows = await gameRanking(select.value);
       clear(list);
-      list.append(rankingTable(rows, 'Aucun point sur ce jeu ce mois-ci.'));
+      list.append(rankingTable(rows, 'Aucune XP sur ce jeu ce mois-ci.'));
     } catch (error) {
       clear(list); list.append(errorCard(error));
     }
@@ -221,7 +224,7 @@ async function renderGroups(panel) {
     const list = el('div.board__list', {}, [el('p.board__loading', { text: 'Chargement…' })]);
     box.append(list);
     groupRanking(group.code)
-      .then((rows) => { clear(list); list.append(rankingTable(rows, 'Aucun point ce mois-ci.')); })
+      .then((rows) => { clear(list); list.append(rankingTable(rows, 'Aucune XP ce mois-ci.')); })
       .catch((error) => { clear(list); list.append(errorCard(error)); });
     box.append(el('button.cf-giveup', {
       type: 'button', text: 'Quitter le groupe',
@@ -397,7 +400,7 @@ function rankingTable(rows, emptyText) {
     table.append(el('li.board__row', {}, [
       el('span.board__rank', { text: `${row.rang}` }),
       el('span.board__name', { text: row.pseudo }),
-      el('span.board__score', { text: `${row.points}` }),
+      el('span.board__score', { text: `${row.points} XP` }),
     ]));
   }
   return table;
@@ -407,7 +410,7 @@ function errorCard(error) {
   const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
   return el('div.board__error', {}, [
     el('p', { text: offline
-      ? 'Pas de réseau : le classement s’affichera à la prochaine connexion. Tes points sont gardés.'
+      ? 'Pas de réseau : le classement s’affichera à la prochaine connexion. Ton XP est gardée.'
       : `Le classement n’a pas répondu : ${error.message}` }),
   ]);
 }
@@ -467,7 +470,7 @@ function accountFooter(body) {
       type: 'button', text: 'Supprimer mon compte',
       onClick: () => showModal({
         title: 'Supprimer le compte ?',
-        body: el('p', { text: 'Ton pseudo, tes points et tes groupes seront effacés '
+        body: el('p', { text: 'Ton pseudo, ton XP et tes groupes seront effacés '
           + 'définitivement. Ta progression sur cet appareil, elle, reste intacte.' }),
         actions: [
           { label: 'Annuler' },

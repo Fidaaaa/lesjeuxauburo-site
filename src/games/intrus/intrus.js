@@ -243,6 +243,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? (state.themeFound ? 'Sans-faute !' : 'Intrus démasqué') : 'Intrus non trouvé',
         message, revealNode: reveal,

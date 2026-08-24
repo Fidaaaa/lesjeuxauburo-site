@@ -250,6 +250,7 @@ export default {
       const won = state.status === 'win';
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? `Résolu — ${stars()} ⭐` : 'Solution révélée',
         message: won

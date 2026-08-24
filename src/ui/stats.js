@@ -8,6 +8,8 @@ import { showModal } from './modal.js';
 import { STORAGE_PREFIX } from '../core/config.js';
 import { exportBackup, importBackup, progressAtRisk } from '../core/persistence.js';
 import { copyText } from '../core/share.js';
+import { carriere, effectiveStreak, multiplierFor, XP_BASE } from '../core/xp.js';
+import { getPuzzleDate } from '../core/date.js';
 
 // Ordre d'affichage des clés de répartition, par jeu.
 const DIST_ORDER = {
@@ -44,12 +46,40 @@ export function renderStats(view) {
   ]));
 
   // Global
-  let played = 0; let wins = 0; let bestStreak = 0;
+  let played = 0; let wins = 0; let bestStreak = 0; let xpTotal = 0;
   for (const g of AVAILABLE_GAMES) {
     const s = loadStats(g.id);
-    played += s.played; wins += s.wins;
+    played += s.played; wins += s.wins; xpTotal += s.xp || 0;
     bestStreak = Math.max(bestStreak, s.maxStreak);
   }
+
+  // Carrière : le poste atteint depuis le début, tous jeux confondus.
+  const poste = carriere(xpTotal);
+  wrap.append(el('section.carriere-detail', {}, [
+    el('div.carriere-detail__head', {}, [
+      el('span.carriere-detail__emoji', { 'aria-hidden': 'true', text: poste.emoji }),
+      el('div', {}, [
+        el('div.carriere-detail__titre', { text: poste.titre }),
+        el('div.carriere-detail__rang', {
+          text: `Niveau ${poste.niveau} sur ${poste.total} · ${poste.xp.toLocaleString('fr-FR')} XP`,
+        }),
+      ]),
+    ]),
+    el('div.carriere-detail__bar', { 'aria-hidden': 'true' }, [
+      el('div.carriere-detail__fill', { style: { width: `${poste.progression * 100}%` } }),
+    ]),
+    el('p.carriere-detail__next', {
+      text: poste.suivant
+        ? `Encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} ».`
+        : 'Plus rien au-dessus. La direction, c’est toi.',
+    }),
+    el('p.carriere-detail__regle', {
+      text: `Chaque jeu réussi rapporte ${XP_BASE} XP. À partir de 3 jours d’affilée `
+          + `sur un même jeu, il en rapporte le double ; à partir de 25 jours, le quadruple. `
+          + `Un jour sauté ou un abandon remet la série de ce jeu à zéro.`,
+    }),
+  ]));
+
   wrap.append(el('section.stats-global', {}, [
     statTile('Parties jouées', String(played)),
     statTile('Victoires', `${pct(wins, played)}%`),
@@ -175,11 +205,16 @@ function gameStatCard(g) {
     statsArtwork(g),
     el('span.stats-card__name', { text: g.name }),
   ]));
+  // La série affichée est celle qui vaut aujourd'hui : celle enregistrée n'est
+  // remise à jour qu'en jouant, et survivrait à plusieurs jours d'absence.
+  const serie = effectiveStreak(s, getPuzzleDate());
+  const facteur = multiplierFor(serie);
   card.append(el('div.stats-card__row', {}, [
     miniStat(String(s.played), 'jouées'),
     miniStat(`${pct(s.wins, s.played)}%`, 'victoires'),
-    miniStat(`🔥 ${s.currentStreak}`, 'série'),
+    miniStat(`🔥 ${serie}`, facteur > 1 ? `série · ×${facteur}` : 'série'),
     miniStat(`🏆 ${s.maxStreak}`, 'record'),
+    miniStat((s.xp || 0).toLocaleString('fr-FR'), 'XP'),
   ]));
 
   // Répartition

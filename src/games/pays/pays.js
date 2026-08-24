@@ -249,6 +249,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? `Trouvé en ${state.guesses.length}/${MAX_TRIES}` : 'Perdu',
         message, revealNode: reveal, shareText: buildShareText(),

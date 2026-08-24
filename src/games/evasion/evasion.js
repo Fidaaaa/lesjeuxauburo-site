@@ -413,6 +413,7 @@ export default {
         : `Le meilleur chemin faisait ${par} coups. Reviens demain plus reposé. ☕`;
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won, title: won ? `Évadé en ${moves} coups !` : 'Abandon',
         message, shareText: buildShareText(won),
         nextGameHint: 'Continue ta tournée : il reste des jeux à faire ! →',

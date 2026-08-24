@@ -253,6 +253,7 @@ export default {
       else message = LOSE_MESSAGES[ctx.puzzleNumber % LOSE_MESSAGES.length];
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? (state.mistakes === 0 ? 'Sans faute !' : `Trouvé — ${state.mistakes} erreur(s)`) : 'Perdu',
         message,

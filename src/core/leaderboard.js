@@ -42,7 +42,14 @@ export function recordWin(gameId, dateStr) {
   flush().catch(() => {});
 }
 
-/** Envoie ce qui attend. Les points déjà connus du serveur sont ignorés. */
+/**
+ * Envoie ce qui attend. Les points déjà connus du serveur sont ignorés.
+ *
+ * On n'écrit plus directement dans la table : `enregistrer_scores` recalcule
+ * la série de chaque jeu depuis les lignes déjà en base et en déduit l'XP.
+ * L'app n'envoie donc toujours que « tel jeu, tel jour » — elle n'a aucun
+ * moyen de s'attribuer un multiplicateur qu'elle n'a pas mérité.
+ */
 export async function flush() {
   if (!LEADERBOARD_ENABLED || !isSignedIn()) return 0;
   const queue = readQueue();
@@ -51,16 +58,19 @@ export async function flush() {
   if (!profil) return 0;
 
   try {
-    await request('/rest/v1/scores', {
-      method: 'POST',
-      body: queue.map((s) => ({ profil, jeu: s.jeu, jour: s.jour })),
-      // Un point déjà enregistré n'est pas une erreur : on l'ignore.
-      headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+    await rpc('enregistrer_scores', {
+      entrees: queue.map((s) => ({ jeu: s.jeu, jour: s.jour })),
     });
   } catch (error) {
-    // 4xx : le serveur refuse (date trop vieille, profil absent). Inutile de
-    // réessayer indéfiniment. 5xx ou réseau : on garde pour plus tard.
-    if (error.status >= 400 && error.status < 500) writeQueue([]);
+    // On ne jette la file que sur un 400 : une requête malformée le restera,
+    // la réessayer ne mènerait nulle part.
+    //
+    // Tout le reste se garde, y compris le 404. Il signale que la fonction
+    // n'est pas encore en base — un site déployé avant son schéma — et jeter
+    // la file à ce moment-là ferait perdre pour de bon l'XP des joueurs, alors
+    // qu'il suffit d'attendre. Une session expirée (401) se rattrape de même à
+    // la reconnexion.
+    if (error.status === 400) writeQueue([]);
     return 0;
   }
   writeQueue([]);
@@ -133,11 +143,12 @@ export async function myMonthlyPoints() {
   const firstOfMonth = new Date();
   firstOfMonth.setDate(1);
   const since = firstOfMonth.toISOString().slice(0, 10);
+  // On somme l'XP, et non plus le nombre de lignes : une partie en série vaut
+  // deux ou quatre fois une partie isolée.
   const rows = await request(
-    `/rest/v1/scores?profil=eq.${id}&jour=gte.${since}&select=jeu`,
-    { headers: { Prefer: 'count=exact' } },
+    `/rest/v1/scores?profil=eq.${id}&jour=gte.${since}&select=xp`,
   );
-  return Array.isArray(rows) ? rows.length : 0;
+  return Array.isArray(rows) ? rows.reduce((total, r) => total + (r.xp || 0), 0) : 0;
 }
 
 // Le réseau revient : on tente de vider la file, sans bruit.

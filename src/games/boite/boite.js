@@ -231,6 +231,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? `Bouclée en ${state.words.length} mot(s)` : 'Boîte non vidée',
         message: won

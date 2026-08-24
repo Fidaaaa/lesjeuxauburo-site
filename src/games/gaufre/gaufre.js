@@ -214,6 +214,7 @@ export default {
       ]);
       clear(endSlot);
       endSlot.append(buildEndPanel({
+        gameId: GAME_ID,
         won,
         title: won ? `Résolue — ${stars()} ⭐` : 'Échanges épuisés',
         message: won

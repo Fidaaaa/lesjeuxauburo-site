@@ -8,6 +8,7 @@ import { tourneeSummary, gameDayState } from '../core/tournee.js';
 import { el, clear } from '../core/dom.js';
 import { bindHumanCountdown } from './countdown.js';
 import { navigate } from '../core/router.js';
+import { effectiveStreak, multiplierFor, carriere, XP_BASE } from '../core/xp.js';
 
 const STATE_BADGE = {
   win: { icon: '✅', label: 'Réussi' },
@@ -70,11 +71,37 @@ export function renderHub(view) {
     ]),
   ]);
 
+  // --- Carrière ---
+  // L'XP de tous les jeux réunis. Le grade du jour ci-dessus juge la tournée
+  // en cours ; celui-ci suit le poste occupé depuis le début, et ne redescend
+  // jamais.
+  const xpTotal = GAMES.reduce((total, g) => total + (loadStats(g.id).xp || 0), 0);
+  const poste = carriere(xpTotal);
+  const carriereCard = el('a.carriere-card', {
+    href: '#/stats', 'aria-label': `Carrière : ${poste.titre}, ${poste.xp} XP`,
+  }, [
+    el('span.carriere-card__emoji', { 'aria-hidden': 'true', text: poste.emoji }),
+    el('div.carriere-card__body', {}, [
+      el('div.carriere-card__top', {}, [
+        el('span.carriere-card__titre', { text: poste.titre }),
+        el('span.carriere-card__xp', { text: `${poste.xp.toLocaleString('fr-FR')} XP` }),
+      ]),
+      el('div.carriere-card__bar', { 'aria-hidden': 'true' }, [
+        el('div.carriere-card__fill', { style: { width: `${poste.progression * 100}%` } }),
+      ]),
+      el('div.carriere-card__next', {
+        text: poste.suivant
+          ? `Encore ${poste.manquant.toLocaleString('fr-FR')} XP avant « ${poste.suivant} »`
+          : 'Sommet de la hiérarchie atteint. Personne au-dessus.',
+      }),
+    ]),
+  ]);
+
   // --- Grille des jeux ---
   const grid = el('div.hub__grid');
   GAMES.forEach((game, index) => grid.append(gameCard(game, dateStr, index)));
 
-  hub.append(hero, tourneeCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
+  hub.append(hero, tourneeCard, carriereCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
     el('footer.hub__footer', {}, [
       el('a.hub__stats-link', { href: '#/stats', text: '📊 Mes statistiques' }),
       el('a.hub__stats-link', { href: '#/classement', text: '🏆 Classement du mois' }),
@@ -127,6 +154,10 @@ function gameCard(game, dateStr, index = 0) {
   const st = gameDayState(game.id, dateStr);
   const stats = loadStats(game.id);
   const badge = STATE_BADGE[st.status] || STATE_BADGE.none;
+  // La série telle qu'elle vaut aujourd'hui, jours manqués déduits, et le
+  // multiplicateur qu'elle ouvre pour la partie du jour.
+  const serie = effectiveStreak(stats, dateStr);
+  const facteur = multiplierFor(serie);
 
   const stamp = STAMP[st.status];
 
@@ -142,7 +173,20 @@ function gameCard(game, dateStr, index = 0) {
       el('div.gamecard__name', {}, [game.name]),
       el('div.gamecard__tag', { text: game.tagline }),
       el('div.gamecard__stats', {}, [
-        stats.currentStreak > 0 ? el('span.gamecard__streak', { text: `🔥 ${stats.currentStreak}` }) : null,
+        serie > 0
+          ? el('span.gamecard__streak', {
+              text: `🔥 ${serie}`,
+              title: `${serie} jour${serie > 1 ? 's' : ''} d’affilée`,
+            })
+          : null,
+        // Le multiplicateur s'annonce avant la partie : c'est ce qui donne
+        // envie de ne pas laisser tomber le jeu aujourd'hui.
+        facteur > 1
+          ? el('span.gamecard__mult', {
+              text: `×${facteur}`,
+              title: `Ce jeu rapporte ${XP_BASE * facteur} XP aujourd’hui`,
+            })
+          : null,
         st.label ? el('span.gamecard__score', { text: st.label }) : null,
       ]),
     ]),

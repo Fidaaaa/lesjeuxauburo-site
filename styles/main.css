@@ -240,6 +240,63 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .3, 1);
 }
 
+/* ---------- Carrière ----------
+   La progression de fond, par opposition au grade du jour juste au-dessus :
+   elle ne redescend jamais, et cliquer mène au détail dans les statistiques. */
+.carriere-card {
+  display: flex; align-items: center; gap: .8rem;
+  margin-top: .7rem; padding: .8rem 1rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  color: inherit; text-decoration: none;
+  animation: pose .48s cubic-bezier(.2, .75, .3, 1) both;
+  transition: transform .14s cubic-bezier(.2, .8, .3, 1), box-shadow .18s ease;
+}
+.carriere-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.carriere-card__emoji { font-size: 1.7rem; flex: none; }
+.carriere-card__body { flex: 1; min-width: 0; }
+.carriere-card__top {
+  display: flex; align-items: baseline; justify-content: space-between; gap: .6rem;
+}
+.carriere-card__titre { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
+.carriere-card__xp {
+  font-weight: 800; font-size: .82rem; color: var(--coffee);
+  font-variant-numeric: tabular-nums; flex: none;
+}
+.carriere-card__bar {
+  height: 6px; background: var(--surface-2); border-radius: 99px;
+  margin: .45rem 0 .3rem; overflow: hidden;
+}
+.carriere-card__fill {
+  height: 100%; background: linear-gradient(90deg, var(--coffee), var(--primary));
+  border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .3, 1);
+}
+.carriere-card__next { font-size: .76rem; color: var(--muted); }
+
+/* La même chose en grand, sur la page des statistiques. */
+.carriere-detail {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 1rem; margin-bottom: .9rem;
+}
+.carriere-detail__head { display: flex; align-items: center; gap: .8rem; }
+.carriere-detail__emoji { font-size: 2.2rem; }
+.carriere-detail__titre { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; }
+.carriere-detail__rang { color: var(--muted); font-size: .85rem; }
+.carriere-detail__bar {
+  height: 8px; background: var(--surface-2); border-radius: 99px;
+  margin: .8rem 0 .4rem; overflow: hidden;
+}
+.carriere-detail__fill {
+  height: 100%; background: linear-gradient(90deg, var(--coffee), var(--primary));
+  border-radius: 99px;
+}
+.carriere-detail__next { font-size: .85rem; font-weight: 600; }
+.carriere-detail__regle {
+  font-size: .8rem; color: var(--muted); margin-top: .6rem;
+  padding-top: .6rem; border-top: 1px solid var(--border);
+}
+
 .hub__grid { display: grid; grid-template-columns: 1fr; gap: .7rem; }
 @media (min-width: 460px) { .hub__grid { grid-template-columns: 1fr 1fr; } }
 
@@ -280,6 +337,13 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .gamecard__tag { color: var(--muted); font-size: .82rem; margin-top: .1rem; }
 .gamecard__stats { display: flex; gap: .5rem; margin-top: .35rem; font-size: .8rem; font-weight: 700; min-height: 1em; }
 .gamecard__streak { color: var(--coffee); }
+/* Le multiplicateur du jour, annoncé avant la partie. */
+.gamecard__mult {
+  font-family: var(--font-display); font-weight: 700; font-size: .74rem;
+  padding: .05rem .38rem; border-radius: 99px;
+  color: var(--primary-ink); background: var(--coffee);
+  letter-spacing: .02em;
+}
 .gamecard__score { color: var(--muted); }
 .gamecard__state { display: flex; flex-direction: column; align-items: center; gap: .1rem; flex: none; width: 56px; text-align: center; }
 .gamecard__badge { font-size: 1.3rem; }
@@ -767,6 +831,27 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .endpanel__msg { color: var(--text); margin: .4rem 0 .8rem; }
 .endpanel__hint { color: var(--muted); font-size: .85rem; margin-bottom: .6rem; }
 .endpanel__actions { display: flex; flex-direction: column; gap: .5rem; }
+/* Le gain de la partie, juste sous le message : c'est là que le multiplicateur
+   se voit enfin payer. */
+.endpanel__xp {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: .45rem; margin-top: .7rem;
+}
+.endpanel__xp-gain {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+  color: var(--coffee);
+}
+.endpanel__xp-mult {
+  font-family: var(--font-display); font-weight: 700; font-size: .8rem;
+  background: var(--coffee); color: var(--primary-ink);
+  padding: .08rem .42rem; border-radius: 99px;
+}
+.endpanel__xp-serie { font-size: .85rem; color: var(--muted); }
+.endpanel__xp-next {
+  margin-top: .35rem; font-size: .82rem; font-weight: 600;
+  color: var(--accent); text-align: center;
+}
+
 .endpanel__countdown {
   margin-top: 1rem; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums;
 }
@@ -790,10 +875,15 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 }
 .stats-card__art img { width: 84%; height: 84%; object-fit: contain; }
 .stats-card__name { font-weight: 800; font-size: 1.05rem; }
-.stats-card__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin-bottom: .8rem; }
-.mini-stat { text-align: center; }
-.mini-stat__value { font-weight: 800; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
-.mini-stat__label { font-size: .68rem; color: var(--muted); }
+/* Cinq mesures : cinq colonnes égales. Le libellé de la série peut porter le
+   multiplicateur (« série · ×2 »), d'où la coupure autorisée. */
+.stats-card__row { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-bottom: .8rem; }
+.mini-stat { text-align: center; min-width: 0; }
+.mini-stat__value { font-weight: 800; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.mini-stat__label { font-size: .64rem; color: var(--muted); line-height: 1.2; }
+@media (max-width: 359px) {
+  .stats-card__row { grid-template-columns: repeat(3, 1fr); row-gap: .55rem; }
+}
 .stats-card__empty { color: var(--muted); font-size: .9rem; text-align: center; }
 .dist-chart { display: grid; gap: .3rem; }
 .dist-row { display: grid; grid-template-columns: 4.5rem 1fr; gap: .5rem; align-items: center; }
