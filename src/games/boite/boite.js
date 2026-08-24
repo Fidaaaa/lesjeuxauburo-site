@@ -205,6 +205,13 @@ export default {
       if (state.status !== 'playing') commitResult();
     }
 
+    /** Le résumé partageable, sans rien dévoiler de la solution. */
+    function partageDuJour(won) {
+      return `lesjeuxauburo · La Boîte à Lettres n°${ctx.puzzleNumber}\n`
+           + (won ? `🔠 Bouclée en ${count} mot(s)` : '🔠 Non résolue')
+           + `\n${siteUrl()}`;
+    }
+
     function commitResult() {
       if (loadResult(GAME_ID, ctx.dateStr)) return;
       const won = state.status === 'win';
@@ -213,9 +220,7 @@ export default {
       saveResult(GAME_ID, ctx.dateStr, {
         status: won ? 'win' : 'lose', points,
         scoreLabel: won ? `${count} mot${count > 1 ? 's' : ''}` : '✗',
-        share: `lesjeuxauburo · La Boîte à Lettres n°${ctx.puzzleNumber}\n`
-             + (won ? `🔠 Bouclée en ${count} mot(s)` : '🔠 Non résolue')
-             + `\n${siteUrl()}`,
+        share: partageDuJour(won),
       });
       recordStats(GAME_ID, {
         dateStr: ctx.dateStr, won,
@@ -238,7 +243,7 @@ export default {
           ? WIN_MESSAGES[(ctx.puzzleNumber + state.words.length) % WIN_MESSAGES.length]
           : 'Ces douze lettres t’ont résisté. Voici une solution. 🤔',
         revealNode: reveal,
-        shareText: '',
+        shareText: partageDuJour(won),
         nextGameHint: 'Continue ta tournée : il reste des jeux à faire ! →',
       }));
       endSlot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

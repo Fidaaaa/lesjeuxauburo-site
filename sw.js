@@ -11,7 +11,7 @@
 
 // À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
 // sans cela, les visiteurs de retour garderaient l'ancienne version.
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors

@@ -189,6 +189,13 @@ export default {
       return state.status === 'win' ? Math.max(0, Math.min(5, swapsLeft())) : 0;
     }
 
+    /** Le résumé partageable, sans rien dévoiler de la solution. */
+    function partageDuJour(won) {
+      return `lesjeuxauburo · La Gaufre n°${ctx.puzzleNumber}\n`
+           + (won ? `🧇 Résolue, ${stars()} étoile(s)` : '🧇 Gaufre ratée')
+           + `\n${siteUrl()}`;
+    }
+
     function commitResult() {
       if (loadResult(GAME_ID, ctx.dateStr)) return;
       const won = state.status === 'win';
@@ -196,9 +203,7 @@ export default {
         status: won ? 'win' : 'lose',
         points: won ? Math.min(100, 60 + stars() * 8) : 0,
         scoreLabel: won ? '⭐'.repeat(stars() || 1) : '✗',
-        share: `lesjeuxauburo · La Gaufre n°${ctx.puzzleNumber}\n`
-             + (won ? `🧇 Résolue, ${stars()} étoile(s)` : '🧇 Gaufre ratée')
-             + `\n${siteUrl()}`,
+        share: partageDuJour(won),
       });
       recordStats(GAME_ID, {
         dateStr: ctx.dateStr, won,
@@ -221,7 +226,7 @@ export default {
           ? WIN_MESSAGES[(ctx.puzzleNumber + state.swaps) % WIN_MESSAGES.length]
           : `La gaufre se résolvait en ${puz.par} échanges. Demain, tu la retournes. 🔁`,
         revealNode: reveal,
-        shareText: '',
+        shareText: partageDuJour(won),
         nextGameHint: 'Continue ta tournée : il reste des jeux à faire ! →',
       }));
       endSlot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

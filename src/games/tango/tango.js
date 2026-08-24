@@ -212,6 +212,13 @@ export default {
       if (state.status !== 'playing') commitResult();
     }
 
+    /** Le résumé partageable, sans rien dévoiler de la solution. */
+    function partageDuJour(won) {
+      return `lesjeuxauburo · Tango n°${ctx.puzzleNumber}\n`
+           + (won ? `🌗 Résolu, ${stars()} étoile(s)` : '🌗 Abandonné')
+           + `\n${siteUrl()}`;
+    }
+
     function commitResult() {
       if (loadResult(GAME_ID, ctx.dateStr)) return;
       const won = state.status === 'win';
@@ -219,9 +226,7 @@ export default {
         status: won ? 'win' : 'lose',
         points: won ? Math.max(50, 100 - Math.max(0, state.taps - minTaps) * 2) : 0,
         scoreLabel: won ? '⭐'.repeat(stars()) : '✗',
-        share: `lesjeuxauburo · Tango n°${ctx.puzzleNumber}\n`
-             + (won ? `🌗 Résolu, ${stars()} étoile(s)` : '🌗 Abandonné')
-             + `\n${siteUrl()}`,
+        share: partageDuJour(won),
       });
       recordStats(GAME_ID, {
         dateStr: ctx.dateStr, won,
@@ -257,7 +262,7 @@ export default {
           ? WIN_MESSAGES[(ctx.puzzleNumber + state.taps) % WIN_MESSAGES.length]
           : 'La grille est affichée. Demain, une nouvelle logique. 🔁',
         revealNode: null,
-        shareText: '',
+        shareText: partageDuJour(won),
         nextGameHint: 'Continue ta tournée : il reste des jeux à faire ! →',
       }));
       endSlot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

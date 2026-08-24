@@ -7,6 +7,8 @@ import { navigate } from '../core/router.js';
 import { loadStats } from '../core/storage.js';
 import { xpFor, multiplierFor, nextPalier, effectiveStreak, XP_BASE } from '../core/xp.js';
 import { getPuzzleDate, addDays } from '../core/date.js';
+import { partager } from '../core/share.js';
+import { showModal } from './modal.js';
 import { emplacement } from './pub.js';
 
 /**
@@ -60,9 +62,59 @@ function ligneXP(gameId) {
   ]);
 }
 
-// `shareText` est encore produit par les jeux et conservé dans les résultats
-// (utile pour un futur partage), mais aucun bouton ne l'expose.
-export function buildEndPanel({ won, title, message, revealNode, nextGameHint, gameId }) {
+/** Le texte à copier soi-même, quand ni le partage ni la copie n'ont marché. */
+function montrerLeTexte(texte) {
+  const champ = el('textarea.backup__field', {
+    rows: '5', readonly: '', 'aria-label': 'Ton résultat, à copier',
+  });
+  champ.value = texte;
+  showModal({
+    title: 'Copie-le d’ici',
+    body: el('div', {}, [
+      el('p', { text: 'Ton navigateur n’a pas voulu du presse-papier. Le texte '
+                    + 'est là, déjà sélectionné.' }),
+      champ,
+    ]),
+    actions: [{ label: 'Fermer', primary: true }],
+  });
+  champ.focus();
+  champ.select();
+}
+
+/**
+ * Bouton de partage. Absent si le jeu n'a pas produit de texte.
+ *
+ * Le libellé rend compte de ce qui s'est réellement passé : sur mobile la
+ * feuille système s'ouvre, ailleurs le texte part dans le presse-papier — et
+ * dire « copié » quand rien ne l'a été serait pire que se taire.
+ */
+function boutonPartage(texte) {
+  if (!texte) return null;
+  const bouton = el('button.btn.btn--ghost.endpanel__share', {
+    type: 'button', text: '📋 Partager mon résultat',
+    onClick: async () => {
+      const avant = bouton.textContent;
+      bouton.disabled = true;
+      const issue = await partager(texte);
+      bouton.disabled = false;
+
+      // Ni feuille de partage ni presse-papier : plutôt que de laisser le
+      // joueur devant un « impossible » sans recours, on lui montre le texte,
+      // déjà sélectionné. Il reste toujours la sélection à la main.
+      if (issue === 'echec') { montrerLeTexte(texte); return; }
+
+      bouton.textContent = {
+        partage: '✅ Partagé !',
+        copie: '✅ Copié — colle-le où tu veux',
+        annule: avant,
+      }[issue];
+      if (issue !== 'annule') setTimeout(() => { bouton.textContent = avant; }, 2600);
+    },
+  });
+  return bouton;
+}
+
+export function buildEndPanel({ won, title, message, revealNode, nextGameHint, gameId, shareText }) {
   const badge = el('div.endpanel__badge', {
     'data-state': won ? 'win' : 'lose',
   }, [won ? '🏆' : '😵', ' ', title]);
@@ -77,6 +129,9 @@ export function buildEndPanel({ won, title, message, revealNode, nextGameHint, g
   ]);
 
   const actions = el('div.endpanel__actions', {}, [
+    // Le partage d'abord : c'est le geste qu'on espère, et le retour au hub
+    // reste à portée juste en dessous.
+    boutonPartage(shareText),
     el('button.btn.btn--primary', {
       type: 'button', text: '🏠 Retour au hub',
       onClick: () => navigate('/'),

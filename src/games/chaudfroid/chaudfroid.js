@@ -29,9 +29,11 @@ const HOW_TO = {
       <li><span class="chip" style="background:#5b8fd1">🔵</span> <strong>Froid</strong></li>
     </ul>
     <p>Un <strong>thermomètre de -20° (glacial) à 99° (tout proche)</strong> indique ta chaleur. Essais illimités, l'historique se trie du plus chaud au plus froid.</p>
-    <p>Le jeu s'appuie sur un vocabulaire de <strong>noms communs courants</strong>.
-    Un mot qu'il ne connaît pas est refusé plutôt que noté « froid » — mieux vaut
-    te le dire que te laisser croire que tu t'éloignes.</p>
+    <p>Le jeu reconnaît quelques milliers de <strong>noms communs</strong>, mais il
+    ne sait situer que ceux de ses propres thèmes. Hors de là, il répond
+    <strong>« hors thème »</strong> sans donner de température : il préfère avouer
+    qu'il ne sait pas plutôt que t'annoncer « froid » sur un mot qui brûlait.
+    Un mot qu'il ne connaît pas du tout est refusé.</p>
   `,
 };
 
@@ -44,7 +46,9 @@ const HOW_TO = {
 // la seule chose vraie qu'on puisse en dire.
 export const CF_CAP = CF_LIST_SIZE; // fin des cercles utiles
 export function tempFor(rank) {
-  if (rank == null || rank > CF_CAP) return -20;
+  // `null` plutôt que −20 : hors des cercles, le jeu n'a pas de thermomètre à
+  // proposer. L'affichage montre alors le palier, sans degré inventé.
+  if (rank == null || rank > CF_CAP) return null;
   const t = Math.round(99 - (rank - 2) * (114 / (CF_CAP - 2)));
   return Math.max(-15, Math.min(99, t));
 }
@@ -73,25 +77,28 @@ function normalize(s) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-// Un mot que le jeu ne connaît pas n'est pas « froid » : il est hors sujet.
-// Les confondre était le défaut du jeu — proposer « transport » ou « roue »
-// pour « moto » renvoyait −20°, exactement comme un mot sans aucun rapport, et
-// le joueur en concluait qu'il faisait fausse route alors qu'il brûlait.
+// La connaissance du jeu s'arrête aux cercles sémantiques.
 //
-// Ce cas ne se produit plus à la saisie (les mots inconnus sont refusés), mais
-// les parties déjà enregistrées en contiennent : on les affiche pour ce qu'ils
-// sont.
-const HORS_VOCABULAIRE = { name: 'Inconnu', emoji: '❔', cls: 'inconnu', rank: '—' };
+// Au-delà, il **reconnaît** le mot — il est dans son vocabulaire — mais il ne
+// sait pas le situer : l'ordre y est alphabétique. Lui coller « froid −20° »
+// serait une affirmation qu'il ne peut pas soutenir, et parfois fausse :
+// « bicyclette » n'est pas loin de « moto », le jeu ne sait simplement pas les
+// rapprocher. Le joueur, lui, en conclurait qu'il fait fausse route.
+//
+// On l'annonce donc « hors thème », sans température. Moins satisfaisant qu'un
+// chiffre, mais c'est la seule chose vraie — et surtout ça n'écarte personne
+// d'une piste qui était la bonne.
+const HORS_THEME = { name: 'Hors thème', emoji: '❔', cls: 'inconnu', rank: '—' };
 
 export function bandFor(rank) {
-  if (rank == null) return { ...HORS_VOCABULAIRE };
+  if (rank == null || rank > CF_CAP) return { ...HORS_THEME };
   const t = tempFor(rank);
   for (const b of BANDS) if (t >= b.min) return { ...b, rank };
   return { ...BANDS[BANDS.length - 1], rank };
 }
 
 export function proximityPct(rank) {
-  if (rank == null || rank > CF_CAP) return 2;
+  if (rank == null || rank > CF_CAP) return 0;
   return Math.max(3, Math.round(100 * (1 - (rank - 1) / 300)));
 }
 
@@ -216,7 +223,11 @@ export default {
         el('div.cf-entry__row', {}, [
           el('span.cf-entry__word', { text: g.word }),
           el('span.cf-entry__band', {}, [`${b.emoji} ${b.name}`]),
-          el('span.cf-entry__rank', { text: `${tempFor(g.rank)}°` }),
+          // Pas de degré hors des cercles : le palier suffit à dire ce
+          // que le jeu sait, c'est-à-dire rien de précis.
+          el('span.cf-entry__rank', {
+            text: tempFor(g.rank) == null ? '' : `${tempFor(g.rank)}°`,
+          }),
         ]),
       ]);
       return node;

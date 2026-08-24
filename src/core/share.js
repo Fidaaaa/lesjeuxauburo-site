@@ -60,3 +60,28 @@ export function shareFooter() {
 export function buildShare(lines) {
   return lines.filter((l) => l != null).join('\n');
 }
+
+/**
+ * Partage un texte : feuille native du système quand elle existe, copie dans
+ * le presse-papier sinon.
+ *
+ * `navigator.share` n'existe que sur mobile et en contexte sécurisé, et son
+ * absence n'est pas la seule issue : le joueur peut ouvrir la feuille puis
+ * l'annuler, ce qui rejette la promesse avec `AbortError`. Ce n'est pas un
+ * échec — on ne doit ni retomber sur la copie, ni afficher une erreur.
+ *
+ * @returns {Promise<'partage'|'copie'|'annule'|'echec'>}
+ */
+export async function partager(texte) {
+  if (navigator.share && window.isSecureContext) {
+    try {
+      await navigator.share({ text: texte });
+      return 'partage';
+    } catch (erreur) {
+      if (erreur?.name === 'AbortError') return 'annule';
+      // Toute autre panne — permission refusée, appel hors geste utilisateur —
+      // se rattrape par la copie, qui marche partout.
+    }
+  }
+  return (await copyText(texte)) ? 'copie' : 'echec';
+}

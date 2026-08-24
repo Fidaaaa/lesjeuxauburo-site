@@ -877,6 +877,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .endpanel__msg { color: var(--text); margin: .4rem 0 .8rem; }
 .endpanel__hint { color: var(--muted); font-size: .85rem; margin-bottom: .6rem; }
 .endpanel__actions { display: flex; flex-direction: column; gap: .5rem; }
+/* Le partage passe avant le retour au hub : c'est le geste qu'on espère. */
+.endpanel__share { font-weight: 700; }
 /* Le gain de la partie, juste sous le message : c'est là que le multiplicateur
    se voit enfin payer. */
 .endpanel__xp {
