@@ -88,7 +88,7 @@ function montrerLeTexte(texte) {
  * feuille système s'ouvre, ailleurs le texte part dans le presse-papier — et
  * dire « copié » quand rien ne l'a été serait pire que se taire.
  */
-function boutonPartage(texte) {
+function boutonPartage(texte, gameId) {
   if (!texte) return null;
   const bouton = el('button.btn.btn--ghost.endpanel__share', {
     type: 'button', text: '📋 Partager mon résultat',
@@ -102,6 +102,14 @@ function boutonPartage(texte) {
       // joueur devant un « impossible » sans recours, on lui montre le texte,
       // déjà sélectionné. Il reste toujours la sélection à la main.
       if (issue === 'echec') { montrerLeTexte(texte); return; }
+
+      // Un partage abouti : la seule mesure honnête de « ce jeu donne envie
+      // d'être raconté ». Une annulation n'en est pas un.
+      if (gameId && issue !== 'annule') {
+        import('../core/balises.js')
+          .then((m) => m.baliser(gameId, getPuzzleDate(), 'partage'))
+          .catch(() => {});
+      }
 
       bouton.textContent = {
         partage: '✅ Partagé !',
@@ -131,7 +139,7 @@ export function buildEndPanel({ won, title, message, revealNode, nextGameHint, g
   const actions = el('div.endpanel__actions', {}, [
     // Le partage d'abord : c'est le geste qu'on espère, et le retour au hub
     // reste à portée juste en dessous.
-    boutonPartage(shareText),
+    boutonPartage(shareText, gameId),
     el('button.btn.btn--primary', {
       type: 'button', text: '🏠 Retour au hub',
       onClick: () => navigate('/'),

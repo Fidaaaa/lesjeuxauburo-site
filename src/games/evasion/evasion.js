@@ -4,6 +4,7 @@
 // Terrains parfois troués (cases bloquées « murs »).
 
 import { EVASION_BANK } from './data.js';
+import { baliser } from '../../core/balises.js';
 import { pickForDay } from '../../core/rng.js';
 import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
@@ -386,7 +387,8 @@ export default {
     }
 
     function win() { status = 'win'; persist(); renderControls(); renderCounter(); dpad.style.display = 'none'; commitResult(true); confetti(); }
-    function giveUp() { if (status !== 'playing') return; status = 'lose'; persist(); renderControls(); dpad.style.display = 'none'; commitResult(false); }
+    function giveUp() { if (status !== 'playing') return; status = 'lose';
+      baliser(GAME_ID, ctx.dateStr, 'abandon'); persist(); renderControls(); dpad.style.display = 'none'; commitResult(false); }
 
     function stars() {
       if (moves <= par) return '★★★';

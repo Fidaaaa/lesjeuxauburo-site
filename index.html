@@ -6,7 +6,19 @@
   <title>lesjeuxauburo — la pause café en mini-jeux</title>
   <meta name="description" content="Dix mini-jeux quotidiens en français à jouer entre collègues pendant la pause café. Un nouveau puzzle chaque jour." />
   <meta name="theme-color" content="#e9edf3" />
+  <link rel="canonical" href="https://lesjeuxauburo.fr/" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/art/icon-192.png" />
+
+  <!-- Ce qu'un moteur et un aperçu de lien affichent. Sans ces balises, un
+       partage sur Slack ou WhatsApp ne montre qu'une URL nue. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="lesjeuxauburo" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:title" content="lesjeuxauburo — la pause café en mini-jeux" />
+  <meta property="og:description" content="Des mini-jeux quotidiens en français à jouer entre collègues pendant la pause café. Un nouveau puzzle chaque matin, gratuit et sans compte." />
+  <meta property="og:url" content="https://lesjeuxauburo.fr/" />
+  <meta property="og:image" content="https://lesjeuxauburo.fr/assets/art/apple-touch-icon.png" />
+  <meta name="twitter:card" content="summary" />
   <link rel="stylesheet" href="styles/main.css" />
 
   <!-- Installation sur l'écran d'accueil. Sur iPhone, c'est ce qui met la
@@ -35,7 +47,34 @@
     </button>
     <button id="theme-toggle" class="iconbtn topbar__theme" type="button">🌗</button>
   </header>
-  <main id="view" class="view" tabindex="-1"></main>
+  <!-- ⚠️ Ce bloc n'est PAS décoratif.
+       Sans lui, un robot ne lit que « Aller au contenu lesjeuxauburo » : tout
+       le reste est peint par JavaScript, et les routes du site sont des
+       fragments (#/mot) qu'aucun moteur ne considère comme des adresses.
+       Le routeur vide `#view` au démarrage et le remplace par le jeu — ce
+       texte n'est donc jamais vu par un visiteur dont le JavaScript marche,
+       et il dit exactement ce que le site fait. -->
+  <main id="view" class="view" tabindex="-1">
+    <h1>lesjeuxauburo</h1>
+    <p>Des mini-jeux quotidiens en français, pensés pour la pause café au
+    bureau. Un nouveau puzzle chaque matin à 2&nbsp;h, le même pour tout le
+    monde — de quoi comparer ses résultats avec ses collègues.</p>
+    <p>Gratuit, jouable hors ligne, sans compte et sans publicité.</p>
+    <h2>Les jeux</h2>
+    <ul>
+      <li><a href="jeux/le-mot.html">Le Mot</a> — devinez le mot du jour en six essais</li>
+      <li><a href="jeux/connexions.html">Connexions</a> — regroupez seize mots en quatre familles cachées</li>
+      <li><a href="jeux/les-allumettes.html">Les Allumettes</a> — déplacez une allumette pour rétablir l'équation</li>
+      <li><a href="jeux/l-intrus.html">L'Intrus</a> — trouvez le mot qui ne colle pas avec les autres</li>
+      <li><a href="jeux/chaud-froid.html">Chaud-Froid</a> — approchez le mot secret par le sens</li>
+      <li><a href="jeux/le-pays.html">Le Pays</a> — reconnaissez le pays à sa silhouette</li>
+      <li><a href="jeux/l-evasion.html">L'Évasion</a> — faites glisser les blocs pour libérer la tasse</li>
+      <li><a href="jeux/la-boite-a-lettres.html">La Boîte à Lettres</a> — enchaînez des mots pour épuiser douze lettres</li>
+      <li><a href="jeux/la-gaufre.html">La Gaufre</a> — remettez six mots croisés d'aplomb</li>
+      <li><a href="jeux/tango.html">Tango</a> — soleils et lunes, une seule logique</li>
+    </ul>
+    <p><a href="support.html">Les règles en détail</a></p>
+  </main>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

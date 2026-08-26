@@ -156,6 +156,14 @@ export function surveillerReglages(quandChange) {
     }
   });
 
-  if (!document.hidden) demarrer();
+  // ⚠️ On démarre **sans conditionner à `document.hidden`**.
+  //
+  // Un contexte qui se déclare caché à tort — panneau intégré, onglet
+  // préchargé, navigateur exotique — n'aurait alors jamais lancé la
+  // surveillance, et la bascule du tableau de bord serait restée sans effet
+  // jusqu'au prochain chargement. Le premier réveil n'arrive qu'au bout d'une
+  // minute : démarrer pour rien ne coûte rien, ne pas démarrer coûte la
+  // fonctionnalité.
+  demarrer();
   return () => arreter();
 }

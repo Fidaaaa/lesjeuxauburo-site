@@ -76,6 +76,14 @@ async function render() {
     return;
   }
 
+  // Une balise « ouvert ». C'est elle qui distingue un jeu que personne ne
+  // visite d'un jeu qu'on ouvre puis qu'on referme — deux situations
+  // indiscernables dans la table des scores, et qui appellent des corrections
+  // opposées.
+  import('./balises.js')
+    .then((m) => m.baliser(game.id, getPuzzleDate(), 'ouvert'))
+    .catch(() => { /* les balises sont facultatives */ });
+
   viewEl.dataset.route = game.id;
   viewEl.append(document.createTextNode('')); // placeholder
   try {

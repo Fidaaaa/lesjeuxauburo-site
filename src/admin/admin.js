@@ -21,7 +21,7 @@
 import { el, clear } from '../core/dom.js';
 import { GAMES } from '../core/registry.js';
 import {
-  isSignedIn, isAnonymous, signIn, signInAnonymously, signOut, rpc, request,
+  isSignedIn, isAnonymous, signIn, signOut, rpc, request, captureRedirect,
 } from '../core/account.js';
 import { nombre } from '../core/format.js';
 
@@ -95,14 +95,16 @@ function ecranErreur(texte) {
 // ------------------------------------------------------------------ données
 
 async function chargerTout() {
-  const [bilan, parJeu, courbe, comptes, reglages] = await Promise.all([
+  const [bilan, parJeu, entonnoir, courbe, comptes, reglages] = await Promise.all([
     rpc('bilan_admin'),
     rpc('bilan_par_jeu', { jours: 30 }),
+    rpc('entonnoir_admin', { jours: 30 }),
     rpc('courbe_admin', { jours: 30 }),
     rpc('comptes_admin'),
     request('/rest/v1/reglages_jeux?select=jeu,actif,note,modifie_le&order=jeu'),
   ]);
-  return { bilan, parJeu, courbe, comptes: comptes?.[0] || null, reglages };
+  return { bilan, parJeu, entonnoir, courbe,
+           comptes: comptes?.[0] || null, reglages };
 }
 
 // ------------------------------------------------------------------ rendu
@@ -182,6 +184,43 @@ function blocParJeu(parJeu) {
   ]);
 }
 
+function blocEntonnoir(entonnoir) {
+  const utiles = (entonnoir || []).filter((j) => j.ouvertes > 0);
+  if (!utiles.length) {
+    return carte('L’entonnoir, par jeu', [
+      el('p', { text: 'Aucune balise encore. Elles se posent dès qu’un joueur '
+                    + 'connecté ouvre un jeu.' }),
+      el('p.admin__note', {
+        text: 'Rien n’est enregistré sans compte : un visiteur qui joue sans '
+            + 's’identifier ne laisse aucune trace, et c’est voulu.',
+      }),
+    ]);
+  }
+  const lignes = utiles.map((j) => {
+    const fini = j.gagnees + j.perdues + j.abandons;
+    const taux = j.ouvertes ? Math.round((fini / j.ouvertes) * 100) : 0;
+    return [
+      nomDe(j.jeu),
+      nombre(j.ouvertes),
+      nombre(j.gagnees),
+      nombre(j.abandons),
+      `${taux} %`,
+      j.essais == null ? '—' : String(j.essais),
+      nombre(j.indices),
+      nombre(j.partages),
+    ];
+  });
+  return carte('L’entonnoir, par jeu', [
+    el('p.admin__note', {
+      text: 'Combien ouvrent, combien vont au bout. C’est la seule vue qui '
+          + 'dise pourquoi un jeu marche mal : peu ouvert, il manque de '
+          + 'visite ; ouvert puis abandonné, il déçoit ceux qui viennent.',
+    }),
+    tableau(['Jeu', 'Ouvert', 'Gagné', 'Abandon', 'Terminé', 'Essais moy.',
+             'Indices', 'Partages'], lignes),
+  ]);
+}
+
 function blocCourbe(courbe) {
   if (!courbe?.length) {
     return carte('Jour après jour', el('p', { text: 'Pas encore de partie enregistrée.' }));
@@ -219,6 +258,7 @@ async function ecranBord() {
     blocReglages(donnees.reglages || [], recharger),
     blocResume(donnees.bilan, donnees.comptes),
     blocParJeu(donnees.parJeu),
+    blocEntonnoir(donnees.entonnoir),
     blocCourbe(donnees.courbe),
     el('p.page__back', {}, [
       el('a', { href: 'index.html', text: '← Retour au jeu' }),
@@ -246,5 +286,14 @@ async function demarrer() {
     ecranErreur(erreur.message || 'Erreur inconnue.');
   }
 }
+
+// ⚠️ À faire avant tout le reste.
+//
+// Au retour d'une connexion Apple ou Google, les jetons arrivent dans le
+// fragment de l'URL. `main.js` s'en charge sur la page de jeu — mais cette
+// page-ci ne le charge pas. Sans cet appel, se connecter depuis le tableau de
+// bord renvoyait indéfiniment à l'écran de connexion : les jetons arrivaient,
+// et personne ne les lisait.
+captureRedirect();
 
 demarrer();

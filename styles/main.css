@@ -475,6 +475,33 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .page__table th { background: var(--surface-2); font-weight: 700; }
 .page__list dt { font-weight: 700; margin-top: .9rem; }
 .page__list dd { margin: .2rem 0 0 0; color: var(--muted); }
+/* Pages de jeu (jeux/*.html) — engendrées par tools/gen_seo.py. Elles
+   existent pour être trouvées par un moteur, et lues par un humain qui
+   cherche les règles : les deux demandent le même soin. */
+.page__lede {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: -.4rem 0 1.2rem;
+}
+
+.page__liens {
+  list-style: none;
+  padding: 0;
+  margin: .6rem 0 1.4rem;
+  display: grid;
+  gap: .5rem;
+}
+
+.page__liens li {
+  padding: .6rem .8rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: .92rem;
+}
+
+.page__liens a { font-weight: 700; }
+
 .page__back { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: .9rem; }
 
 /* ---------- En-tête de jeu ---------- */

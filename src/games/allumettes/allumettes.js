@@ -4,6 +4,7 @@
 // vide pour en poser une.
 
 import { ALLUMETTES_BANK } from './data.js';
+import { baliser } from '../../core/balises.js';
 import { pickForDay } from '../../core/rng.js';
 import { scheduledPuzzle } from '../../core/schedule.js';
 import { addDays } from '../../core/date.js';
@@ -355,6 +356,8 @@ export default {
       if (status !== 'playing') return;
       const sol = solve(startCells, need);
       usedHint = true;
+      // Un abandon, pas un indice : le joueur renonce et voit la solution.
+      baliser(GAME_ID, ctx.dateStr, 'abandon');
       status = 'lose';
       // affiche la solution sur le plateau
       if (sol) {

@@ -59,6 +59,16 @@ export function saveResult(gameId, dateStr, result) {
       .then((m) => m.recordWin(gameId, dateStr))
       .catch(() => { /* le classement est facultatif */ });
   }
+  // Une balise sur l'issue. Posée ici plutôt que dans chacun des dix jeux :
+  // c'est le seul endroit par où passent toutes les fins de partie, donc le
+  // seul qu'on ne puisse pas oublier en ajoutant un jeu.
+  if (result?.status === 'win' || result?.status === 'lose') {
+    import('./balises.js')
+      .then((m) => m.baliser(gameId, dateStr,
+                             result.status === 'win' ? 'gagne' : 'perdu',
+                             result.essais ?? result.points))
+      .catch(() => { /* les balises sont facultatives */ });
+  }
   return saved;
 }
 

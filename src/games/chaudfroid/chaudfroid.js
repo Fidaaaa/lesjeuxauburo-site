@@ -15,6 +15,7 @@ import { toast, confetti } from '../../ui/effects.js';
 import { buildEndPanel } from '../../ui/endpanel.js';
 import { maybeShowHowTo, howToButton } from '../../ui/howto.js';
 import { siteUrl } from '../../core/share.js';
+import { baliser } from '../../core/balises.js';
 
 const GAME_ID = 'chaudfroid';
 
@@ -356,6 +357,9 @@ export default {
       if (state.guesses.length < INDICES[n].seuil) return;
       state.indices = n + 1;
       saveGameState(GAME_ID, ctx.dateStr, state);
+      // Combien d'indices il a fallu : c'est la mesure la plus directe de la
+      // difficulté ressentie, bien plus que le nombre d'essais.
+      baliser(GAME_ID, ctx.dateStr, 'indice', state.indices);
       renderIndices();
       renderInput();
     }
@@ -441,6 +445,7 @@ export default {
       if (state.status !== 'playing') return;
       state.revealed = true;
       state.status = 'lose';
+      baliser(GAME_ID, ctx.dateStr, 'abandon');
       saveGameState(GAME_ID, ctx.dateStr, state);
       renderAll();
       commitResult();

@@ -120,7 +120,11 @@ export async function signInAnonymously() {
 /** Adresse de retour après la connexion : la page classement. */
 function redirectTarget() {
   const { origin, pathname } = window.location;
-  return `${origin}${pathname}#/classement`;
+  // On revient **là d'où l'on vient**. Le fragment « #/classement » n'a de
+  // sens que sur la page de jeu : ailleurs — le tableau de bord, par exemple —
+  // il désignerait une route qui n'existe pas.
+  const surLeJeu = pathname.endsWith('/') || pathname.endsWith('index.html');
+  return `${origin}${pathname}${surLeJeu ? '#/classement' : ''}`;
 }
 
 /** Ouvre la connexion Apple ou Google (redirection plein écran). */

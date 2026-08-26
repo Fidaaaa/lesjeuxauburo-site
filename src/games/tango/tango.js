@@ -4,6 +4,7 @@
 // des symboles identiques ou opposés. Une seule solution par grille.
 
 import { TANGO_BANK } from './data.js';
+import { baliser } from '../../core/balises.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
 import { scheduledPuzzle } from '../../core/schedule.js';
@@ -202,6 +203,7 @@ export default {
     function giveUp() {
       if (state.status !== 'playing') return;
       state.status = 'lose';
+      baliser(GAME_ID, ctx.dateStr, 'abandon');
       state.cells = puz.solution;
       persist();
       renderAll();

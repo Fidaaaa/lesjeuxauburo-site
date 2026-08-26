@@ -1,0 +1,10 @@
+# lesjeuxauburo — ce qu'un robot peut visiter.
+#
+# Tout est ouvert sauf le tableau de bord : il est inutile sans compte
+# administrateur, et sa place n'est pas dans un moteur de recherche.
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://lesjeuxauburo.fr/sitemap.xml

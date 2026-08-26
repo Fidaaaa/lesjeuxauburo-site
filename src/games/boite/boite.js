@@ -4,6 +4,7 @@
 // utiliser les douze lettres.
 
 import { BOITE_BANK } from './data.js';
+import { baliser } from '../../core/balises.js';
 import { DICTIONARY } from '../../data/dictionary_fr.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
@@ -196,6 +197,7 @@ export default {
     function giveUp() {
       if (state.status !== 'playing') return;
       state.status = 'lose';
+      baliser(GAME_ID, ctx.dateStr, 'abandon');
       persist();
       renderAll();
     }
