@@ -12,6 +12,7 @@
 //   /rest/v1/…           lit et écrit, sous l'identité du jeton
 
 import { SUPABASE_URL, SUPABASE_KEY, STORAGE_PREFIX } from './config.js';
+import { acceptable, REFUS } from './moderation.js';
 
 const SESSION_KEY = `${STORAGE_PREFIX}:session`;
 // On renouvelle un peu avant l'expiration : une requête qui part pile à
@@ -273,6 +274,12 @@ export async function setPseudo(pseudo) {
   const clean = pseudo.trim();
   if (clean.length < 2 || clean.length > 18) {
     throw new Error('Le pseudo doit faire entre 2 et 18 caractères');
+  }
+  // Le pseudo s'affiche sur un classement public. Ce contrôle-ci sert à
+  // répondre tout de suite ; celui qui protège vraiment est le déclencheur
+  // PostgreSQL, seul à ne pas être contournable.
+  if (!acceptable(clean)) {
+    throw new Error(REFUS);
   }
   try {
     await request('/rest/v1/profils', {

@@ -6,6 +6,7 @@
 // ouverture du classement, retour du réseau).
 
 import { SUPABASE_URL, SUPABASE_KEY, LEADERBOARD_ENABLED, STORAGE_PREFIX } from './config.js';
+import { acceptable, REFUS } from './moderation.js';
 import { isSignedIn, request, rpc, currentUserId } from './account.js';
 import { siteUrl } from './share.js';
 
@@ -120,7 +121,10 @@ export function myGroups() {
 }
 
 export function createGroup(name, password) {
-  return rpc('creer_groupe', { nom_groupe: name.trim(), mot_de_passe: password || null });
+  const clean = name.trim();
+  // Un nom de groupe est lu par tous ses membres : même filtre que le pseudo.
+  if (!acceptable(clean)) throw new Error(REFUS.replace('pseudo', 'nom'));
+  return rpc('creer_groupe', { nom_groupe: clean, mot_de_passe: password || null });
 }
 
 export function joinGroup(code, password) {

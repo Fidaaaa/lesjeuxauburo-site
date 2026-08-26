@@ -2,6 +2,7 @@
 // Gère le contexte de puzzle (date Paris, numéro) et le nettoyage entre vues.
 
 import { getGame } from './registry.js';
+import { jeuActif } from './reglages.js';
 import { getPuzzleDate, getDayNumber, getPuzzleNumber } from './date.js';
 import { renderHub } from '../ui/hub.js';
 import { renderStats } from '../ui/stats.js';
@@ -67,7 +68,10 @@ async function render() {
   }
 
   const game = getGame(routeId);
-  if (!game || !game.available) {
+  // `available` : le jeu n'existe pas dans cette version.
+  // `jeuActif` : il existe mais il est fermé aujourd'hui — un signet, un lien
+  // partagé ou un retour en arrière peut encore y mener.
+  if (!game || !game.available || !jeuActif(game.id)) {
     navigate('/');
     return;
   }
@@ -94,4 +98,9 @@ export function startRouter(mountPoint) {
   viewEl = mountPoint;
   window.addEventListener('hashchange', render);
   render();
+}
+
+/** Redessine l'écran courant. Sert quand une donnée de fond a changé. */
+export function redessiner() {
+  if (viewEl) render();
 }

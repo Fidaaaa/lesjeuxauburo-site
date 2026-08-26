@@ -1,7 +1,7 @@
 // Score de tournée : agrège les résultats du jour sur tous les jeux disponibles
 // et attribue un grade « bureau » fun. Enrichi au fil des phases.
 
-import { AVAILABLE_GAMES } from './registry.js';
+import { jeuxOuverts } from './registry.js';
 import { loadResult, loadGameState } from './storage.js';
 
 // État d'un jeu pour un jour donné, vu par le hub.
@@ -48,12 +48,12 @@ export function gradeFor(metric) {
 
 // Résumé de la tournée du jour.
 export function tourneeSummary(dateStr) {
-  const total = AVAILABLE_GAMES.length;
+  const total = jeuxOuverts().length;
   let done = 0;
   let wins = 0;
   let sumPoints = 0;
   const perGame = {};
-  for (const g of AVAILABLE_GAMES) {
+  for (const g of jeuxOuverts()) {
     const s = gameDayState(g.id, dateStr);
     perGame[g.id] = s;
     if (s.status === 'win' || s.status === 'lose') {

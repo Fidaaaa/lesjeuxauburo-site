@@ -1,7 +1,7 @@
 // Page d'accueil = hub. Une carte par jeu avec l'état du jour, le score et la
 // streak. Objectif : donner envie de « finir sa tournée » quotidienne.
 
-import { GAMES, AVAILABLE_GAMES } from '../core/registry.js';
+import { GAMES, jeuxOuverts } from '../core/registry.js';
 import { getPuzzleDate, humanDate, isDateOverridden } from '../core/date.js';
 import { loadStats } from '../core/storage.js';
 import { tourneeSummary, gameDayState } from '../core/tournee.js';
@@ -50,7 +50,7 @@ export function renderHub(view) {
       el('img.hub__brand-logo', { src: 'assets/logo.svg', alt: '', width: 56, height: 56 }),
       ' lesjeuxauburo',
     ]),
-    el('p.hub__tagline', { text: `${AVAILABLE_GAMES.length} mini-jeux pour la pause café. De nouveaux chaque matin.` }),
+    el('p.hub__tagline', { text: `${jeuxOuverts().length} mini-jeux pour la pause café. De nouveaux chaque matin.` }),
     el('p.hub__date', { text: capitalize(humanDate(dateStr)) + (isDateOverridden() ? ' (date simulée)' : '') }),
     el('p.hub__countdown', {}, [el('span', { text: 'Prochaine fournée ' }), countdownValue]),
   ]);
@@ -74,6 +74,8 @@ export function renderHub(view) {
   // L'XP de tous les jeux réunis. Le grade du jour ci-dessus juge la tournée
   // en cours ; celui-ci suit le poste occupé depuis le début, et ne redescend
   // jamais.
+  // L'XP de carrière compte **tous** les jeux, même fermés : elle a été
+  // gagnée, on ne la retire pas parce qu'un jeu ferme.
   const xpTotal = GAMES.reduce((total, g) => total + (loadStats(g.id).xp || 0), 0);
   const poste = carriere(xpTotal);
   const carriereCard = el('a.carriere-card', {
@@ -99,7 +101,10 @@ export function renderHub(view) {
 
   // --- Grille des jeux ---
   const grid = el('div.hub__grid');
-  GAMES.forEach((game, index) => grid.append(gameCard(game, dateStr, index)));
+  // Les jeux **ouverts** seulement : un jeu fermé disparaît de la tournée,
+  // il ne s'affiche pas grisé. Une carte inerte n'informe personne et donne
+  // l'impression d'une app en panne.
+  jeuxOuverts().forEach((game, index) => grid.append(gameCard(game, dateStr, index)));
 
   hub.append(hero, tourneeCard, carriereCard, el('h2.hub__section', { text: 'Ta tournée' }), grid,
     // Après la liste des jeux : le regard y arrive une fois le choix fait,
@@ -112,6 +117,10 @@ export function renderHub(view) {
         el('a', { href: 'support.html', text: 'Aide' }),
         ' · ',
         el('a', { href: 'confidentialite.html', text: 'Confidentialité' }),
+        ' · ',
+        // Lexique (CC BY-SA), le dictionnaire (MIT) et les deux polices (OFL)
+        // exigent d'être crédités. Le lien doit donc exister quelque part.
+        el('a', { href: 'credits.html', text: 'Crédits' }),
       ]),
     ]));
   view.append(hub);

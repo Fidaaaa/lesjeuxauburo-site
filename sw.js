@@ -11,7 +11,7 @@
 
 // À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
 // sans cela, les visiteurs de retour garderaient l'ancienne version.
-const VERSION = 'v16';
+const VERSION = 'v17';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors
@@ -21,6 +21,10 @@ const SHELL = [
   './index.html',
   './support.html',
   './confidentialite.html',
+  './credits.html',
+  // admin.html n'est volontairement pas préchargée : un tableau de bord servi
+  // depuis un cache dirait l'état d'hier, et on y déciderait sur du faux.
+  './styles/admin.css',
   './rejoindre.html',
   './manifest.webmanifest',
   './styles/main.css',

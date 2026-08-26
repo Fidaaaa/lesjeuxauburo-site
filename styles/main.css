@@ -744,6 +744,25 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .cf-input:focus { border-color: var(--primary); outline: none; }
 .cf-count { text-align: center; color: var(--muted); font-size: .82rem; margin-top: .5rem; }
 .cf-giveup { display: block; margin: .3rem auto 0; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: .85rem; }
+/* Les indices. Un seul est proposé à la fois ; ceux déjà pris restent lisibles
+   au-dessus, parce que le joueur les a payés. */
+.cf-indices { max-width: 460px; margin: .8rem auto 0; display: grid; gap: .35rem; }
+.cf-indice {
+  font-size: .85rem; text-align: center; padding: .5rem .7rem;
+  border-radius: var(--radius-sm); border: 1px dashed var(--border);
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+}
+.cf-indice--verrou { color: var(--muted); background: none; }
+.cf-indice--pret {
+  font: inherit; font-size: .85rem; cursor: pointer; color: var(--text);
+  background: var(--surface); border-style: solid; border-color: var(--primary);
+}
+.cf-indice--pret:hover { background: var(--surface-2, var(--surface)); }
+.cf-indice--pris {
+  border-style: solid; background: var(--surface); font-weight: 600;
+}
+.cf-indice__pastille { font-size: 1rem; }
+
 .cf-last { max-width: 500px; margin: 1rem auto 0; }
 .cf-last__label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .3rem; }
 .cf-history__title { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 1.3rem .2rem .5rem; }

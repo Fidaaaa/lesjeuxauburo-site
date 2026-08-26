@@ -1,7 +1,7 @@
 // Page statistiques : parties jouées, % de victoires, streak actuelle et record,
 // répartition des scores — par jeu et en global.
 
-import { GAMES, AVAILABLE_GAMES } from '../core/registry.js';
+import { GAMES } from '../core/registry.js';
 import { loadStats } from '../core/storage.js';
 import { el, clear } from '../core/dom.js';
 import { showModal } from './modal.js';
@@ -49,8 +49,10 @@ export function renderStats(view) {
   ]));
 
   // Global
+  // Tous les jeux, même fermés : le total d'une vie de joueur ne doit pas
+  // baisser parce qu'un jeu a été retiré de la tournée.
   let played = 0; let wins = 0; let bestStreak = 0; let xpTotal = 0;
-  for (const g of AVAILABLE_GAMES) {
+  for (const g of GAMES) {
     const s = loadStats(g.id);
     played += s.played; wins += s.wins; xpTotal += s.xp || 0;
     bestStreak = Math.max(bestStreak, s.maxStreak);
@@ -92,6 +94,9 @@ export function renderStats(view) {
   // Par jeu
   wrap.append(el('h2.stats__section', { text: 'Par jeu' }));
   const list = el('div.stats-games');
+  // Ici GAMES et non jeuxOuverts() : les statistiques d'un jeu fermé restent
+  // consultables. Les effacer de l'écran donnerait l'impression de les avoir
+  // perdues.
   for (const g of GAMES) {
     if (!g.available) continue;
     list.append(gameStatCard(g));

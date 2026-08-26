@@ -4,7 +4,7 @@
 // n'empêche rien : le jeu reste entier.
 
 import { el, clear } from '../core/dom.js';
-import { AVAILABLE_GAMES } from '../core/registry.js';
+import { jeuxOuverts } from '../core/registry.js';
 import {
   isSignedIn, isAnonymous, signIn, signInAnonymously, signOut, myProfile,
   setPseudo, deleteAccount, saveProfileDetails,
@@ -176,7 +176,7 @@ async function renderGlobal(panel) {
 async function renderByGame(panel) {
   clear(panel);
   const select = el('select.board__select', { 'aria-label': 'Choisir un jeu' },
-    AVAILABLE_GAMES.map((g) => el('option', { value: g.id, text: g.name })));
+    jeuxOuverts().map((g) => el('option', { value: g.id, text: g.name })));
   const list = el('div.board__list');
   panel.append(select, list);
 
@@ -505,6 +505,16 @@ function accountFooter(body) {
           },
         ],
       }),
+    }),
+    // Les pseudos sont filtrés à l'écriture, mais aucun filtre ne voit tout.
+    // Un joueur doit pouvoir signaler ce qui passe au travers, et l'adresse
+    // doit être publiée : c'est la règle 1.2 de l'App Store, et c'est de toute
+    // façon la moindre des choses sur un classement public.
+    el('a.hub__stats-link', {
+      href: 'mailto:fida.mili@gmail.com'
+        + '?subject=' + encodeURIComponent('Signalement d’un pseudo — lesjeuxauburo')
+        + '&body=' + encodeURIComponent('Pseudo signalé : \n\nMotif : \n'),
+      text: 'Signaler un pseudo',
     }),
   ]);
 }

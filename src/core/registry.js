@@ -1,8 +1,18 @@
 // Registre des jeux. Une entrée par jeu, avec métadonnées pour le hub et un
 // chargeur dynamique (import à la volée) pour le module de jeu.
 //
-// `available: false` => carte « Bientôt » sur le hub (site fonctionnel à chaque
-// phase). Passe à true au fur et à mesure des phases.
+// Deux notions distinctes, qu'il ne faut pas confondre :
+//
+//   * `available` — le jeu **existe** dans cette version. À `false`, il n'est
+//     pas encore écrit ;
+//   * `jeuActif()` (voir reglages.js) — le jeu est **ouvert aujourd'hui**.
+//     Piloté depuis le tableau de bord, sans republier quoi que ce soit.
+//
+// Le nombre de jeux n'est écrit nulle part : il se compte. Il a valu 7, puis
+// 10, il en vaut 8 à la publication et en vaudra peut-être 12 — chaque endroit
+// qui l'aurait recopié serait devenu faux sans prévenir.
+
+import { jeuActif } from './reglages.js';
 
 export const GAMES = [
   {
@@ -111,4 +121,16 @@ export function getGame(id) {
   return GAMES.find((g) => g.id === id) || null;
 }
 
-export const AVAILABLE_GAMES = GAMES.filter((g) => g.available);
+/** Les jeux écrits — indépendamment de leur ouverture du jour. */
+export const GAMES_ECRITS = GAMES.filter((g) => g.available);
+
+/**
+ * Les jeux à montrer aujourd'hui.
+ *
+ * Une **fonction** et non une constante : les réglages arrivent du réseau
+ * après le premier rendu, et une liste figée à l'import ne se mettrait jamais
+ * à jour.
+ */
+export function jeuxOuverts() {
+  return GAMES_ECRITS.filter((g) => jeuActif(g.id));
+}

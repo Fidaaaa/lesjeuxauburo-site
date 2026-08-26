@@ -7,7 +7,7 @@
 
 import { el, clear } from '../core/dom.js';
 import { loadPref, savePref } from '../core/storage.js';
-import { AVAILABLE_GAMES } from '../core/registry.js';
+import { jeuxOuverts } from '../core/registry.js';
 import { authChoices } from './authbuttons.js';
 
 const SEEN = 'onboarded';
@@ -16,7 +16,7 @@ const SLIDES = [
   {
     art: 'assets/logo.png',
     title: 'Bienvenue au buro',
-    text: () => `${AVAILABLE_GAMES.length} mini-jeux en français, pensés pour la pause café. `
+    text: () => `${jeuxOuverts().length} mini-jeux en français, pensés pour la pause café. `
       + 'Comptez cinq minutes par jeu, moins une fois la main prise.',
   },
   {

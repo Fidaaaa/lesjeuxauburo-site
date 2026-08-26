@@ -3,7 +3,7 @@
 // pré-calculé par familles thématiques. Essais illimités, historique trié.
 
 import {
-  CHAUDFROID_BANK, CF_CATEGORIES, CF_DOMAINS, CF_RELATED, CF_FILLER, CF_LIST_SIZE,
+  CHAUDFROID_BANK, CF_CATEGORIES, CF_DOMAINS, CF_RELATED, CF_FILLER,
 } from './data.js';
 import { deobf } from '../../core/crypto.js';
 import { pickForDay } from '../../core/rng.js';
@@ -34,23 +34,65 @@ const HOW_TO = {
     <strong>« hors thème »</strong> sans donner de température : il préfère avouer
     qu'il ne sait pas plutôt que t'annoncer « froid » sur un mot qui brûlait.
     Un mot qu'il ne connaît pas du tout est refusé.</p>
+    <p>Bloqué ? Trois <strong>indices</strong> se débloquent au fil des essais —
+    le nombre de lettres, la première lettre, puis le thème. Chacun coûte
+    <strong>10 points</strong>, mais une partie gagnée avec des indices reste
+    une partie gagnée.</p>
   `,
 };
 
 // Température affichée : -20° (glacial) à 99° (tout proche).
 //
-// L'échelle ne court que sur les cercles sémantiques. Au-delà, la liste est
-// classée par ordre **alphabétique** : y étaler un dégradé donnerait au joueur
-// un signal qui n'existe pas — « abricot » ne serait pas plus proche de
-// « moto » que « zèbre ». Tous ces mots partagent donc le même -20°, ce qui est
-// la seule chose vraie qu'on puisse en dire.
-export const CF_CAP = CF_LIST_SIZE; // fin des cercles utiles
-export function tempFor(rank) {
+// L'échelle court sur les **cercles sémantiques du secret du jour**, et sur eux
+// seuls. Au-delà, la liste est classée par ordre alphabétique : y étaler un
+// dégradé donnerait un signal qui n'existe pas — « abricot » ne serait pas plus
+// proche de « moto » que « zèbre ».
+//
+// ⚠️ La fenêtre **dépend du secret**, elle n'est plus un nombre fixe.
+//
+// Elle a d'abord valu 320, puis 600. Les deux étaient faux pour la même
+// raison : un cercle sémantique pèse entre 551 et 3 277 mots selon le secret,
+// et **764 des 800** se voyaient tronqués. Le jeu jetait alors des mots qu'il
+// savait parfaitement situer. Face à « service » — un terme de tennis — le mot
+// « tennis » tombait au rang 1033 et sortait « hors thème », comme s'il n'avait
+// aucun rapport. Le joueur avait raison et le jeu lui disait le contraire.
+//
+// La règle est donc devenue : **le jeu donne une température à tout ce qu'il
+// sait situer, et à rien d'autre.** La fenêtre s'arrête exactement où
+// s'arrêtent les cercles ; ce qui suit est du remplissage, reconnu mais pas
+// situé.
+
+// Chaque cercle a sa plage de températures. Le jeu sait dans quel cercle tombe
+// un mot ; il ne sait pas ordonner finement à l'intérieur, où le tri n'est
+// qu'alphabétique. La plage dit donc ce qu'il sait, et la position dans la
+// plage n'ajoute qu'un repère de progression.
+//
+// Une interpolation uniforme sur toute la fenêtre ne marchait pas : le cercle
+// propre pèse 85 mots sur 1 200, donc « balle », « raquette », « tennis » et
+// « assiette » sortaient tous à 97°. Le joueur voyait bien qu'il tenait le
+// thème, mais plus rien ne bougeait ensuite.
+const PLAGES = [
+  { cercle: 'propre', haut: 98, bas: 90 },   // même catégorie  → Brûlant
+  { cercle: 'domaine', haut: 89, bas: 60 },  // même domaine    → Chaud
+  { cercle: 'proches', haut: 59, bas: 20 },  // domaine connexe → Tiède / Froid
+];
+
+export function tempFor(rank, bornes) {
   // `null` plutôt que −20 : hors des cercles, le jeu n'a pas de thermomètre à
   // proposer. L'affichage montre alors le palier, sans degré inventé.
-  if (rank == null || rank > CF_CAP) return null;
-  const t = Math.round(99 - (rank - 2) * (114 / (CF_CAP - 2)));
-  return Math.max(-15, Math.min(99, t));
+  if (rank == null || !bornes) return null;
+  if (rank === 1) return 99;
+  let debut = 1;
+  for (const plage of PLAGES) {
+    const fin = bornes[plage.cercle];
+    if (rank <= fin) {
+      const taille = Math.max(1, fin - debut);
+      const part = (rank - debut - 1) / taille;
+      return Math.round(plage.haut - part * (plage.haut - plage.bas));
+    }
+    debut = fin;
+  }
+  return null;
 }
 
 // Les paliers se lisent sur la **température**, pas sur le rang.
@@ -90,16 +132,59 @@ function normalize(s) {
 // d'une piste qui était la bonne.
 const HORS_THEME = { name: 'Hors thème', emoji: '❔', cls: 'inconnu', rank: '—' };
 
-export function bandFor(rank) {
-  if (rank == null || rank > CF_CAP) return { ...HORS_THEME };
-  const t = tempFor(rank);
+export function bandFor(rank, bornes) {
+  const t = tempFor(rank, bornes);
+  if (t == null) return { ...HORS_THEME };
   for (const b of BANDS) if (t >= b.min) return { ...b, rank };
   return { ...BANDS[BANDS.length - 1], rank };
 }
 
-export function proximityPct(rank) {
-  if (rank == null || rank > CF_CAP) return 0;
-  return Math.max(3, Math.round(100 * (1 - (rank - 1) / 300)));
+// Les indices — la sortie de secours d'un joueur bloqué.
+//
+// Le jeu n'offrait que deux issues : trouver, ou donner sa langue au chat. À
+// quarante essais sans progrès, la seconde n'est pas un choix mais une
+// reddition, et c'est un mauvais souvenir à laisser d'une pause café.
+//
+// Les seuils sont volontairement hauts : un indice disponible d'emblée
+// remplacerait le jeu. À quinze essais, on a déjà cherché.
+export const INDICES = [
+  { seuil: 15, etiquette: 'Nombre de lettres' },
+  { seuil: 30, etiquette: 'Première lettre' },
+  { seuil: 50, etiquette: 'Le thème' },
+];
+
+/** Le texte du n-ième indice (0, 1, 2) pour ce secret. */
+export function indiceTexte(n, secret, theme) {
+  if (n === 0) return `${secret.length} lettres`;
+  if (n === 1) return `Commence par « ${secret[0].toUpperCase()} »`;
+  // Le thème peut manquer : un secret n'appartient pas forcément à une
+  // catégorie nommable. On le dit, plutôt que d'afficher un vide.
+  return theme ? `Thème : ${theme}` : 'Aucun thème précis';
+}
+
+/** Le thème affichable d'un secret : sa catégorie, la première par ordre. */
+export function themeDe(secret) {
+  const noms = Object.keys(CF_CATEGORIES)
+    .filter((nom) => CF_CATEGORIES[nom].includes(secret))
+    .sort();
+  return noms[0] || null;
+}
+
+// Le barème. Un indice coûte 10 points, sans jamais descendre sous 20 : la
+// partie gagnée avec trois indices reste une partie gagnée, et le joueur qui
+// s'accroche marque plus que celui qui abandonne.
+export function pointsFor(essais, indices = 0) {
+  const base = essais <= 5 ? 100 : essais <= 10 ? 90 : essais <= 20 ? 75
+    : essais <= 35 ? 60 : essais <= 60 ? 45 : 35;
+  return Math.max(20, base - 10 * indices);
+}
+
+export function proximityPct(rank, bornes) {
+  // La barre suit le thermomètre : deux échelles séparées avaient déjà fini
+  // par se contredire une fois.
+  const t = tempFor(rank, bornes);
+  if (t == null) return 0;
+  return Math.max(3, Math.round(((t + 20) / 119) * 100));
 }
 
 // Domaine de chaque catégorie, déduit de CF_DOMAINS.
@@ -116,10 +201,18 @@ export const VOCABULAIRE = [...new Set([
   ...CF_FILLER,
 ])].sort();
 
-// Reconstruit la liste de voisins d'un secret, du plus proche au plus lointain.
-// L'ordre des cercles doit rester IDENTIQUE à celui du portage Swift : mêmes
-// tris, mêmes cercles, même remplissage.
-export function buildNeighbours(secret) {
+/**
+ * Reconstruit la liste de voisins d'un secret, du plus proche au plus lointain.
+ *
+ * Renvoie aussi `bornes` : où s'arrête chaque cercle. C'est ce qui fixe le
+ * thermomètre — même catégorie, même domaine, domaine connexe — et la
+ * frontière au-delà de laquelle le jeu reconnaît un mot sans savoir le
+ * situer, ce qu'il annonce « hors thème ».
+ *
+ * L'ordre doit rester IDENTIQUE au portage Swift : mêmes tris, mêmes cercles,
+ * même remplissage.
+ */
+export function buildNeighboursDetail(secret) {
   const ordered = [];
   const seen = new Set();
   const add = (word) => {
@@ -132,11 +225,13 @@ export function buildNeighbours(secret) {
     .filter((name) => CF_CATEGORIES[name].includes(secret))
     .sort();
   for (const name of own) for (const w of CF_CATEGORIES[name]) add(w);
+  const finPropre = ordered.length;
 
   const domains = [...new Set(own.map((n) => DOMAIN_OF[n]).filter(Boolean))].sort();
   for (const d of domains) {
     for (const name of CF_DOMAINS[d] || []) for (const w of CF_CATEGORIES[name]) add(w);
   }
+  const finDomaine = ordered.length;
 
   const near = [...new Set(domains.flatMap((d) => CF_RELATED[d] || [])
     .filter((d) => CF_DOMAINS[d]))].sort();
@@ -144,17 +239,21 @@ export function buildNeighbours(secret) {
     for (const name of CF_DOMAINS[d] || []) for (const w of CF_CATEGORIES[name]) add(w);
   }
 
-  for (const w of CF_FILLER) {
-    add(w);
-    if (ordered.length >= CF_LIST_SIZE) break;
-  }
+  // Ici s'arrête ce que le jeu sait situer. Le reste est reconnu, pas situé.
+  const bornes = { propre: finPropre, domaine: finDomaine, proches: ordered.length };
+  const cercles = ordered.length;
 
-  // Au-delà des cercles utiles, le reste du vocabulaire par ordre
-  // alphabétique. Ces mots-là sont loin — la température le dira — mais le jeu
-  // les **connaît**, et c'est toute la différence : les tronquer les renvoyait
-  // dans le même sac que les mots qu'il ignore.
+  // Au-delà, le vocabulaire par ordre alphabétique. Ces mots-là, le jeu les
+  // **connaît** sans savoir les placer, et c'est toute la différence : les
+  // tronquer les renvoyait dans le même sac que les mots qu'il ignore.
+  for (const w of CF_FILLER) add(w);
   for (const w of VOCABULAIRE) add(w);
-  return ordered;
+  return { ordered, cercles, bornes };
+}
+
+/** La liste seule, pour les appels qui n'ont que faire de la frontière. */
+export function buildNeighbours(secret) {
+  return buildNeighboursDetail(secret).ordered;
 }
 
 function todaysSecret(dayNumber, dateStr) {
@@ -163,10 +262,10 @@ function todaysSecret(dayNumber, dateStr) {
   const encode = scheduledPuzzle(GAME_ID, dateStr)
     ?? CHAUDFROID_BANK[pickForDay(CHAUDFROID_BANK.length, dayNumber, GAME_ID)];
   const secret = deobf(encode);
-  const list = buildNeighbours(secret);
+  const { ordered, bornes } = buildNeighboursDetail(secret);
   const rank = new Map();
-  list.forEach((w, i) => rank.set(w, i + 1));
-  return { secret, rank };
+  ordered.forEach((w, i) => rank.set(w, i + 1));
+  return { secret, rank, cap: bornes };
 }
 
 export default {
@@ -174,8 +273,16 @@ export default {
   name: 'Chaud-Froid',
 
   mount(view, ctx) {
-    const { secret, rank } = todaysSecret(ctx.dayNumber, ctx.dateStr);
+    const { secret, rank, cap } = todaysSecret(ctx.dayNumber, ctx.dateStr);
     let state = loadGameState(GAME_ID, ctx.dateStr) || { guesses: [], found: false, revealed: false, status: 'playing' };
+    // `indices` est arrivé après coup : les parties du jour déjà en cours
+    // n'en ont pas, et `undefined` ferait échouer chaque comparaison.
+    if (typeof state.indices !== 'number') state.indices = 0;
+    // Les rangs sont **recalculés**, jamais relus. Une partie commencée avant
+    // un changement d'ordre garderait sinon ses anciennes températures, et le
+    // joueur verrait ses essais se refroidir tout seuls entre deux ouvertures.
+    state.guesses = state.guesses.map((g) => ({ ...g, rank: rank.get(g.word) ?? null }));
+    const theme = themeDe(secret);
 
     clear(view);
     view.append(el('div.game-head', {}, [
@@ -187,10 +294,12 @@ export default {
     ]));
 
     const inputZone = el('div.cf-inputzone');
+    const indiceZone = el('div.cf-indices', { 'aria-live': 'polite' });
     const lastZone = el('div.cf-last', { 'aria-live': 'polite' });
     const historyBox = el('div.cf-history');
     const endSlot = el('div.end-slot', { 'aria-live': 'polite' });
-    view.append(inputZone, lastZone, el('h2.cf-history__title', { text: 'Tes propositions' }), historyBox, endSlot);
+    view.append(inputZone, indiceZone, lastZone,
+      el('h2.cf-history__title', { text: 'Tes propositions' }), historyBox, endSlot);
 
     function renderInput() {
       clear(inputZone);
@@ -208,14 +317,52 @@ export default {
         onClick: reveal,
       });
       const best = state.guesses.reduce((m, g) => (g.rank != null && g.rank < m ? g.rank : m), Infinity);
-      const bestTxt = best === Infinity ? '' : ` · meilleur : ${bandFor(best).emoji} ${tempFor(best)}°`;
+      const bestTxt = best === Infinity ? '' : ` · meilleur : ${bandFor(best, cap).emoji} ${tempFor(best, cap)}°`;
       inputZone.append(form, el('p.cf-count', { text: `${state.guesses.length} proposition(s)${bestTxt}` }), giveUp);
       input.focus();
     }
 
+    // Les indices déjà pris restent affichés — les redemander au joueur de
+    // mémoire n'ajouterait rien au jeu, et il a payé pour les avoir.
+    function renderIndices() {
+      clear(indiceZone);
+      for (let n = 0; n < INDICES.length; n++) {
+        if (n < state.indices) {
+          indiceZone.append(el('p.cf-indice.cf-indice--pris', {}, [
+            el('span.cf-indice__pastille', { text: '💡', 'aria-hidden': 'true' }),
+            el('span', { text: indiceTexte(n, secret, theme) }),
+          ]));
+          continue;
+        }
+        if (state.status !== 'playing') break;
+        const manque = INDICES[n].seuil - state.guesses.length;
+        if (manque > 0) {
+          indiceZone.append(el('p.cf-indice.cf-indice--verrou', {
+            text: `💡 ${INDICES[n].etiquette} — dans ${manque} essai${manque > 1 ? 's' : ''}`,
+          }));
+        } else {
+          indiceZone.append(el('button.cf-indice.cf-indice--pret', {
+            type: 'button',
+            text: `💡 ${INDICES[n].etiquette} (−10 points)`,
+            onClick: () => prendreIndice(n),
+          }));
+        }
+        break;   // un seul à la fois : le suivant se mérite
+      }
+    }
+
+    function prendreIndice(n) {
+      if (state.status !== 'playing' || n !== state.indices) return;
+      if (state.guesses.length < INDICES[n].seuil) return;
+      state.indices = n + 1;
+      saveGameState(GAME_ID, ctx.dateStr, state);
+      renderIndices();
+      renderInput();
+    }
+
     function entryNode(g, highlight = false) {
-      const b = bandFor(g.rank);
-      const pct = proximityPct(g.rank);
+      const b = bandFor(g.rank, cap);
+      const pct = proximityPct(g.rank, cap);
       const node = el('div.cf-entry', { 'data-band': b.cls, 'data-hi': highlight ? '1' : '0' }, [
         el('div.cf-entry__bar', { 'aria-hidden': 'true' }, [
           el('div.cf-entry__fill', { 'data-band': b.cls, style: { width: pct + '%' } }),
@@ -226,7 +373,7 @@ export default {
           // Pas de degré hors des cercles : le palier suffit à dire ce
           // que le jeu sait, c'est-à-dire rien de précis.
           el('span.cf-entry__rank', {
-            text: tempFor(g.rank) == null ? '' : `${tempFor(g.rank)}°`,
+            text: tempFor(g.rank, cap) == null ? '' : `${tempFor(g.rank, cap)}°`,
           }),
         ]),
       ]);
@@ -247,7 +394,13 @@ export default {
       clear(lastZone);
       if (!state.lastWord) return;
       const g = state.guesses.find((x) => x.word === state.lastWord);
-      if (g) lastZone.append(el('div.cf-last__label', { text: 'Dernier essai' }), entryNode(g, true));
+      if (!g) return;
+      // Inutile quand l'essai est déjà en tête de l'historique : le même mot
+      // s'afficherait deux fois à trois lignes d'intervalle.
+      const meilleur = state.guesses.reduce((m, x) => (
+        (x.rank ?? Infinity) < (m.rank ?? Infinity) ? x : m), g);
+      if (meilleur.word === state.lastWord) return;
+      lastZone.append(el('div.cf-last__label', { text: 'Dernier essai' }), entryNode(g, true));
     }
 
     function submit(value) {
@@ -281,7 +434,7 @@ export default {
         toast(r <= 13 ? '🔥 Ça brûle, ton meilleur essai !' : '📈 Ton meilleur essai, tu chauffes !');
       }
       saveGameState(GAME_ID, ctx.dateStr, state);
-      renderInput(); renderLast(); renderHistory();
+      renderInput(); renderIndices(); renderLast(); renderHistory();
     }
 
     function reveal() {
@@ -297,7 +450,7 @@ export default {
       if (loadResult(GAME_ID, ctx.dateStr)) return;
       const won = state.status === 'win';
       const g = state.guesses.length;
-      const points = won ? (g <= 5 ? 100 : g <= 10 ? 90 : g <= 20 ? 75 : g <= 35 ? 60 : g <= 60 ? 45 : 35) : 0;
+      const points = won ? pointsFor(g, state.indices) : 0;
       saveResult(GAME_ID, ctx.dateStr, {
         status: won ? 'win' : 'lose', points,
         scoreLabel: won ? `${g} ess.` : '✗',
@@ -322,9 +475,12 @@ export default {
       const won = state.status === 'win';
       const g = state.guesses.length;
       const tally = { brulant: 0, chaud: 0, tiede: 0, froid: 0 };
-      for (const x of state.guesses) tally[bandFor(x.rank).cls]++;
+      for (const x of state.guesses) tally[bandFor(x.rank, cap).cls]++;
       const head = `lesjeuxauburo · Chaud-Froid n°${ctx.puzzleNumber} — ${won ? `🎯 ${g} essais` : 'abandon'}`;
-      const line = `🔥${tally.brulant} 🟠${tally.chaud} 🟡${tally.tiede} 🔵${tally.froid}`;
+      // Les indices se disent : deux collègues qui partagent le même jour ne
+      // comparent pas la même partie si l'un en a pris trois.
+      const line = `🔥${tally.brulant} 🟠${tally.chaud} 🟡${tally.tiede} 🔵${tally.froid}`
+        + (state.indices ? ` 💡${state.indices}` : '');
       return `${head}\n${line}\n${siteUrl()}`;
     }
 
@@ -333,6 +489,10 @@ export default {
       const message = won
         ? WIN_MESSAGES[(ctx.puzzleNumber + state.guesses.length) % WIN_MESSAGES.length]
         : 'Tu as donné ta langue au chat. Le mot te fait un clin d’œil. 🐱';
+      const titre = won
+        ? `Trouvé en ${state.guesses.length} essai(s)`
+          + (state.indices ? ` · ${state.indices} indice${state.indices > 1 ? 's' : ''}` : '')
+        : 'Abandon';
       const reveal = el('div.mot-reveal', {}, [
         el('span', { text: 'Le mot secret était ' }),
         el('strong', { text: secret.toUpperCase() }),
@@ -341,7 +501,7 @@ export default {
       endSlot.append(buildEndPanel({
         gameId: GAME_ID,
         won,
-        title: won ? `Trouvé en ${state.guesses.length} essai(s)` : 'Abandon',
+        title: titre,
         message, revealNode: reveal, shareText: buildShareText(),
         nextGameHint: 'Continue ta tournée : il reste des jeux à faire ! →',
       }));
@@ -349,7 +509,7 @@ export default {
     }
 
     function renderAll() {
-      renderInput(); renderLast(); renderHistory();
+      renderInput(); renderIndices(); renderLast(); renderHistory();
       if (state.status !== 'playing') renderEnd(); else clear(endSlot);
     }
 

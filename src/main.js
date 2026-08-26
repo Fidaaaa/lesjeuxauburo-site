@@ -1,10 +1,11 @@
 // Point d'entrée : thème, barre supérieure, démarrage du routeur.
 
 import { applyTheme, watchSystemTheme, cycleTheme, themeIcon, themeLabel } from './core/theme.js';
-import { startRouter, navigate } from './core/router.js';
+import { startRouter, navigate, redessiner } from './core/router.js';
 import { requestPersistentStorage } from './core/persistence.js';
 import { maybeShowOnboarding } from './ui/onboarding.js';
 import { primeSchedule } from './core/schedule.js';
+import { rafraichirReglages, surveillerReglages } from './core/reglages.js';
 import { captureRedirect } from './core/account.js';
 
 function setupTopbar() {
@@ -53,6 +54,14 @@ function init() {
   // Le calendrier des puzzles, quinze jours d'avance. Silencieux : sans réseau,
   // les banques embarquées prennent le relais et le jeu ne s'en aperçoit pas.
   primeSchedule().catch(() => {});
+
+  // Quels jeux sont ouverts aujourd'hui. Le hub s'est déjà affiché avec le
+  // dernier état connu — on ne le redessine que si la réponse le contredit,
+  // pour éviter un clignotement à chaque ouverture.
+  rafraichirReglages().then((change) => { if (change) redessiner(); });
+  // Puis on continue de surveiller : une bascule doit se voir sans recharger,
+  // sans quoi on croit que le bouton du tableau de bord n'a rien fait.
+  surveillerReglages(redessiner);
 
   // Service worker : jeu disponible hors ligne. Absent en http:// non sécurisé,
   // d'où le garde-fou — le site reste parfaitement jouable sans lui.
