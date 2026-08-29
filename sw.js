@@ -11,7 +11,7 @@
 
 // À incrémenter à chaque déploiement qui modifie un fichier déjà en cache :
 // sans cela, les visiteurs de retour garderaient l'ancienne version.
-const VERSION = 'v17';
+const VERSION = '886988c76534';
 const CACHE = `lesjeuxauburo-${VERSION}`;
 
 // Coquille minimale mise en cache dès l'installation : de quoi démarrer hors
@@ -79,17 +79,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache d'abord pour les ressources : instantané, et hors ligne par nature.
+  // Servir puis rafraîchir : on rend le cache tout de suite — instantané, et
+  // hors ligne par nature — mais on va **quand même** chercher la version
+  // fraîche en tâche de fond, pour la visite suivante.
+  //
+  // ⚠️ La version précédente s'arrêtait au cache. Une ressource entrée dedans
+  //    n'en ressortait qu'au changement de nom de cache, c'est-à-dire jamais
+  //    si l'on oubliait d'incrémenter la version. Constaté en vrai : les
+  //    balises ont vécu onze commits sans qu'une seule soit enregistrée,
+  //    parce que le `storage.js` servi aux joueurs restait celui d'avant.
+  //
+  //    Le nom de cache est désormais calculé sur le contenu du site par
+  //    deploy_site.py, ce qui règle le cas à la racine. Ceci en est la
+  //    ceinture : même si ce calcul tombait en panne, une mise à jour finirait
+  //    par arriver — avec une visite de retard, jamais jamais.
   event.respondWith(
     caches.match(request).then((hit) => {
-      if (hit) return hit;
-      return fetch(request).then((response) => {
+      const frais = fetch(request).then((response) => {
         if (response.ok && response.type === 'basic') {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put(request, copy));
         }
         return response;
       });
+      // Hors ligne, `frais` échoue : on ne le laisse pas remonter si l'on a
+      // déjà de quoi répondre.
+      return hit ? (frais.catch(() => {}), hit) : frais;
     }),
   );
 });

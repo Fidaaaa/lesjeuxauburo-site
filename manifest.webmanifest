@@ -1,7 +1,7 @@
 {
   "name": "lesjeuxauburo",
   "short_name": "lesjeuxauburo",
-  "description": "Dix mini-jeux quotidiens en français, à jouer pendant la pause café.",
+  "description": "Huit mini-jeux quotidiens en français, à jouer pendant la pause café.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
